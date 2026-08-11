@@ -1,4 +1,4 @@
-import { Dir, MaxPieceVal } from "../common";
+import { Dir } from "../common";
 
 
 class BoardModel {
@@ -20,6 +20,9 @@ class BoardModel {
     }
 
     public makeMove(dir: number): void {
+        const data = this._data;
+        const moves: number[] = [];
+
         const horizontalMove = dir === Dir.Left || dir === Dir.Right;
 
         const rows = horizontalMove ? this._rows : this._columns;
@@ -46,6 +49,10 @@ class BoardModel {
         let rowCurr = rowStep;
         let colCurr = colStep;
 
+        let moveStartIdx = -1;
+        let moveEndIdx = -1;
+        let movedVal = 0;
+
         for (let r = 0; r < rows; r++) {
             for (let c = 0; c < columns; c++) {
                 let idx;
@@ -57,31 +64,79 @@ class BoardModel {
                 }
                 else {
                     idx = rowCurr + colCurr * rows;
-                    stepDist = columns * colIncrement * -1;
+                    stepDist = rows * rowIncrement * -1;
                 }
 
+                const currentVal = data[idx];
                 const steps = colStep + colIncrement * (colCurr % columns);
 
-                console.log("idx", idx);
-                console.log("steps", steps)
+                moveStartIdx = idx;
+                movedVal = currentVal;
+
+                //console.log("idx", idx);
+                //console.log("steps", steps)
+                
                 for (let i = 0; i < steps; i++) {
                     const nextIdx = idx + (i + 1) * stepDist;
+                    const nextVal = data[nextIdx];
 
-                    console.log(nextIdx);
+                    if (nextVal > 0) {
+                        if (currentVal !== nextVal) break;
+
+                        // this tile already merged
+                        if (moves[moves.length - 2] === nextIdx && moves[moves.length - 1] > 0) break;
+
+                        // values are same
+                        data[idx] = 0;
+                        data[nextIdx] = currentVal + 1;
+                        moves.push(idx, nextIdx, currentVal + 1);
+                        
+                        moveEndIdx = -1;
+                        break;
+                    }
+
+                    moveEndIdx = nextIdx;
+
+                    //console.log(nextIdx);
+                }
+
+                if (moveEndIdx > -1) {
+                    data[moveEndIdx] = movedVal;
+                    data[moveStartIdx] = 0;
+                    moves.push(moveStartIdx, moveEndIdx, 0);
+                    moveEndIdx = -1;
                 }
                 
-                console.log("---");
+                //console.log("---");
                 
                 
                 colCurr += colIncrement;
             }
 
-            console.log("********")
+            //console.log("********")
             
 
             rowCurr += rowIncrement;
             colCurr = colStep;
         }
+    }
+
+
+    public consoleLog(): void {
+        const rows = this._rows;
+        const cols = this._columns;
+        const data = this._data;
+
+        let output = '';
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const idx = r * cols + c;
+                output += data[idx] + ' ';
+            }
+            output += '\n';
+        }
+
+        console.log(output);
     }
 
 }
