@@ -30,7 +30,9 @@ function update(deltaMS: number): void {
     afterMove()
   }
   else if (Input.isPressed("Right")) {
-    model.makeMove(Dir.Right);
+    const moves = model.makeMove(Dir.Right);
+    console.log("moves")
+    console.log(moves)
     afterMove()
   }
 

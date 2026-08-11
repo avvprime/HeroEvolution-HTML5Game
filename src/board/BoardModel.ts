@@ -154,7 +154,7 @@ class BoardModel {
                     //console.log(nextIdx);
                 }
 
-                if (moveEndIdx > -1) {
+                if (moveEndIdx > -1 && movedVal > 0) {
                     data[moveEndIdx] = movedVal;
                     data[moveStartIdx] = 0;
                     moves.push(moveStartIdx, moveEndIdx, 0);
