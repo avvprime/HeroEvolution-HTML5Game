@@ -6,9 +6,12 @@ import Loop from './managers/LoopManager';
 import './style.css'
 
 
-const model = new BoardModel(3, 5);
-for (let i = 0; i < 6; i++) model.setCell(i, 1);
+const model = new BoardModel(3, 3);
+model.setCell(0, 1);
+model.setCell(3, 1);
 model.consoleLog();
+
+
 
 Loop.registerUpdateCallback(update);
 Loop.start();
@@ -37,5 +40,11 @@ function update(deltaMS: number): void {
 
 
 function afterMove(): void {
+  console.log("new")
   model.consoleLog();
+
+  console.log("history");
+  const data = model.getHistory(3);
+  if (data === undefined) return;
+  model.consoleLog(data);
 }

@@ -7,19 +7,73 @@ class BoardModel {
     private _columns: number;
 
     private _data: Uint8Array;
+    private _history: Uint8Array;
+    private _historyIdx: number = 0;
+    private _maxHistoryLog: number = 3;
 
     constructor(rows: number, columns: number) {
         this._rows = rows;
         this._columns = columns;
 
         this._data = new Uint8Array(rows * columns);
+        this._history = new Uint8Array(this._maxHistoryLog * (rows * columns));
     }
 
     public setCell(idx: number, value: number): void {
         this._data[idx] = value;
     }
 
-    public makeMove(dir: number): void {
+    public makeMove(dir: number): number[] {
+        this.saveToHistory();
+        return this.calculateMovement(dir);
+    }
+
+    public getHistory(step: number): Uint8Array | undefined {
+        if (step > this._maxHistoryLog) {
+            console.warn("Cannot bring more than ", this._maxHistoryLog, " steps!");
+            return undefined;
+        }
+
+        if (this._historyIdx < step) {
+            console.warn("Not enough history yet!");
+            return undefined;
+        }
+
+        const totalItems = this._rows * this._columns;
+        const historyIdx = ((this._historyIdx - step) % this._maxHistoryLog) * totalItems;
+        const data = new Uint8Array(totalItems);
+        for (let i = 0; i < totalItems; i++) data[i] = this._history[historyIdx + i];
+
+        return data;
+    }
+
+    public consoleLog(rawData: Uint8Array | undefined = undefined): void {
+        const rows = this._rows;
+        const cols = this._columns;
+        const data = rawData || this._data;
+
+        let output = '';
+        for (let r = 0; r < rows; r++) {
+            for (let c = 0; c < cols; c++) {
+                const idx = r * cols + c;
+                output += data[idx] + ' ';
+            }
+            output += '\n';
+        }
+
+        console.log(output);
+    }
+
+    private saveToHistory(): void {
+        const totalCells = this._rows * this._columns;
+        const historyIdx = (this._historyIdx % this._maxHistoryLog) * totalCells;
+        for (let i = 0; i < totalCells; i++) {
+            this._history[historyIdx + i] = this._data[i];
+        }
+        this._historyIdx++;
+    }
+
+    private calculateMovement(dir: number): number[] {
         const data = this._data;
         const moves: number[] = [];
 
@@ -119,24 +173,8 @@ class BoardModel {
             rowCurr += rowIncrement;
             colCurr = colStep;
         }
-    }
 
-
-    public consoleLog(): void {
-        const rows = this._rows;
-        const cols = this._columns;
-        const data = this._data;
-
-        let output = '';
-        for (let r = 0; r < rows; r++) {
-            for (let c = 0; c < cols; c++) {
-                const idx = r * cols + c;
-                output += data[idx] + ' ';
-            }
-            output += '\n';
-        }
-
-        console.log(output);
+        return moves;
     }
 
 }
