@@ -5,6 +5,7 @@ class BoardModel {
 
     private _rows: number;
     private _columns: number;
+    private _totalTiles: number;
 
     private _data: Uint8Array;
     private _history: Uint8Array;
@@ -14,6 +15,7 @@ class BoardModel {
     constructor(rows: number, columns: number) {
         this._rows = rows;
         this._columns = columns;
+        this._totalTiles = rows * columns;
 
         this._data = new Uint8Array(rows * columns);
         this._history = new Uint8Array(this._maxHistoryLog * (rows * columns));
@@ -28,6 +30,18 @@ class BoardModel {
         return this.calculateMovement(dir);
     }
 
+    public getEmptyTiles(): number[] {
+        const totalTiles = this._totalTiles;
+        const data = this._data;
+        const result: number[] = []; 
+        for (let i = 0; i < totalTiles; i++) {
+            const val = data[i];
+            if (val !== 0) continue;
+            result.push(i);
+        }
+        return result;
+    }
+
     public getHistory(step: number): Uint8Array | undefined {
         if (step > this._maxHistoryLog) {
             console.warn("Cannot bring more than ", this._maxHistoryLog, " steps!");
@@ -39,7 +53,7 @@ class BoardModel {
             return undefined;
         }
 
-        const totalItems = this._rows * this._columns;
+        const totalItems = this._totalTiles;
         const historyIdx = ((this._historyIdx - step) % this._maxHistoryLog) * totalItems;
         const data = new Uint8Array(totalItems);
         for (let i = 0; i < totalItems; i++) data[i] = this._history[historyIdx + i];
@@ -65,9 +79,9 @@ class BoardModel {
     }
 
     private saveToHistory(): void {
-        const totalCells = this._rows * this._columns;
-        const historyIdx = (this._historyIdx % this._maxHistoryLog) * totalCells;
-        for (let i = 0; i < totalCells; i++) {
+        const totalTiles = this._totalTiles
+        const historyIdx = (this._historyIdx % this._maxHistoryLog) * totalTiles;
+        for (let i = 0; i < totalTiles; i++) {
             this._history[historyIdx + i] = this._data[i];
         }
         this._historyIdx++;

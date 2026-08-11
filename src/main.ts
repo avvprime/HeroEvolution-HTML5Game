@@ -8,6 +8,7 @@ import './style.css'
 
 const model = new BoardModel(3, 3);
 model.setCell(0, 1);
+model.setCell(1, 1);
 model.setCell(3, 1);
 model.consoleLog();
 
