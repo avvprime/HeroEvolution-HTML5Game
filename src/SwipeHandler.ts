@@ -9,66 +9,63 @@ export default class SwipeHandler {
     private _dragDist: number = 0;
     private _dragDir: { x: number, y: number } = { x: 0, y: 0 };
     private _dragCardinalDir: number = 0;
+    private _isDragStarted: boolean = false;
+    private _isDragging: boolean = false;
+    private _dragged: boolean = false;
     private _pointerDown: boolean = false;
 
-    public triggerSwipeWithDist: boolean = true;
-
-    constructor() {
-        this._isMobile = (
-            'ontouchstart' in window ||
-            navigator.maxTouchPoints > 0
-        );
+    constructor() { 
+        this._isMobile = ('ontouchstart' in window || navigator.maxTouchPoints > 0);
     }
 
-    public get dir(): { x: number, y: number } { return this._dragDir }
+    public get isMobile(): boolean { return this._isMobile }
 
-    public get cardinalDir(): number { return this._dragCardinalDir }
+    public get dragging(): boolean { return this._isDragging }
 
-    public get dist(): number { return this._dragDist }
+    public get dragDir(): { x: number, y: number } { return this._dragDir }
+
+    public get dragCardinalDir(): number { return this._dragCardinalDir }
+
+    public get dragDist(): number { return this._dragDist }
 
     public update(): void {
+        let pointerPos;
+
         if (this._isMobile) {
-            if (Input.Touch.down) {
-                const pos = Input.Touch.position;
-                if (this._pointerDown) {
-                    this.calcDrag(pos.x, pos.y);
-                }
-                else {
-                    this._pointerDown = true;
-                    this._dragStart.x = pos.x;
-                    this._dragStart.y = pos.y;
-                }
-            }
-            else {
-                if (this._pointerDown) {
-                    this._pointerDown = false;
-                    this._dragDist = 0;
-                    this._dragDir.x = 0;
-                    this._dragDir.y = 0;
-                }
-            }
+            this._pointerDown = Input.Touch.down;
+            pointerPos = Input.Touch.position;
         }
         else {
-            if (Input.Mouse.lmb.down) {
-                const pos = Input.Mouse.position;
-                if (this._pointerDown) {
-                    this.calcDrag(pos.x, pos.y);
-                }
-                else {
-                    this._pointerDown = true;
-                    this._dragStart.x = pos.x;
-                    this._dragStart.y = pos.y;
-                }
-            }
-            else {
-                if (this._pointerDown) {
-                    this._pointerDown = false;
-                    this._dragDist = 0;
-                    this._dragDir.x = 0;
-                    this._dragDir.y = 0;
-                }
-            }
+            this._pointerDown = Input.Mouse.lmb.down;
+            pointerPos = Input.Mouse.position;
         }
+
+        if (this._pointerDown) {
+            if (this._dragged) return;
+
+            if (!this._isDragStarted) {
+                this._dragStart.x = pointerPos.x;
+                this._dragStart.y = pointerPos.y;
+                this._isDragStarted = true;  
+                return;
+            }
+
+            this.calcDrag(pointerPos.x, pointerPos.y);
+            this._isDragging = true;
+        }
+        else {
+            this._dragged = false;
+            this._isDragging = false;
+            this._isDragStarted = false;
+        }
+    }
+
+    public cancelSwipe(): void {
+        this._dragged = true;
+        this._isDragging = false;
+        this._dragDist = 0;
+        this._dragDir.x = 0;
+        this._dragDir.y = 0;
     }
 
 
