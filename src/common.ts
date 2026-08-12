@@ -6,4 +6,3 @@ export const Dir = {
     Left: 3
 } as const
 
-export const MaxPieceVal = 9999;

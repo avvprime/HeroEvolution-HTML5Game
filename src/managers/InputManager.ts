@@ -62,7 +62,7 @@ class InputManager {
 
     private constructor() {
 
-         const hasTouchScreen = (
+        const hasTouchScreen = (
             'ontouchstart' in window || 
             navigator.maxTouchPoints > 0
         );
@@ -195,12 +195,9 @@ class InputManager {
         this._touch.position.y = touch.clientY;
     }
 
-    private onTouchEnd(e: TouchEvent): void {
-        const touch = e.touches[0];
-        
+    private onTouchEnd(_e: TouchEvent): void {
+        //const touch = e.touches[0];
         this._touch.down = false;
-        this._touch.position.x = touch.clientX;
-        this._touch.position.y = touch.clientY;
     }
 
     private onMouseDown(e: MouseEvent): void {

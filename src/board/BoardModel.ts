@@ -169,7 +169,7 @@ class BoardModel {
                 if (moveEndIdx !== -1) {
                     data[moveEndIdx] = movedVal;
                     data[moveStartIdx] = 0;
-                    moves.push(moveStartIdx, moveEndIdx, movedVal);
+                    if (movedVal > 0) moves.push(moveStartIdx, moveEndIdx, movedVal);
                 }
 
                 
