@@ -6,9 +6,10 @@ import Loop from './managers/LoopManager';
 import './style.css'
 
 
-const model = new BoardModel(3, 3);
+const model = new BoardModel(5, 5);
 model.setCell(0, 1);
 model.setCell(1, 1);
+model.setCell(2, 1)
 model.setCell(3, 1);
 model.consoleLog();
 
@@ -32,8 +33,8 @@ function update(deltaMS: number): void {
   }
   else if (Input.isPressed("Right")) {
     const moves = model.makeMove(Dir.Right);
-    console.log("moves")
-    console.log(moves)
+    //console.log("moves")
+    //console.log(moves)
     afterMove()
   }
 
@@ -43,11 +44,15 @@ function update(deltaMS: number): void {
 
 
 function afterMove(): void {
-  console.log("new")
-  model.consoleLog();
+  const emptyTiles = model.getEmptyTiles();
+  const randomTile = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
+  //model.setCell(randomTile, 1);
 
+  //console.log("new")
+  model.consoleLog();
+  /*
   console.log("history");
   const data = model.getHistory(3);
   if (data === undefined) return;
-  model.consoleLog(data);
+  model.consoleLog(data);*/
 }

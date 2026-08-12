@@ -95,7 +95,7 @@ class BoardModel {
 
         const rows = horizontalMove ? this._rows : this._columns;
         const columns = horizontalMove ? this._columns : this._rows;
-
+        
         let rowStep = 0;
         let colStep = 0;
 
@@ -106,7 +106,7 @@ class BoardModel {
             colStep = columns - 1;
             colIncrement = -1;
         }
-        if (dir === Dir.Down) {
+        else if (dir === Dir.Down) {
             rowStep = rows - 1;
             rowIncrement = -1;
 
@@ -131,14 +131,17 @@ class BoardModel {
                     stepDist = colIncrement * -1;
                 }
                 else {
-                    idx = rowCurr + colCurr * rows;
+                    idx = rowCurr + colCurr * columns;
                     stepDist = rows * rowIncrement * -1;
                 }
 
+
                 const currentVal = data[idx];
                 const steps = colStep + colIncrement * (colCurr % columns);
+    
 
                 moveStartIdx = idx;
+                moveEndIdx = -1;
                 movedVal = currentVal;
 
                 //console.log("idx", idx);
@@ -147,33 +150,29 @@ class BoardModel {
                 for (let i = 0; i < steps; i++) {
                     const nextIdx = idx + (i + 1) * stepDist;
                     const nextVal = data[nextIdx];
+                    
+                    if (nextVal === 0) {
+                        moveEndIdx = nextIdx;
+                        continue;
+                    }
 
-                    if (nextVal > 0) {
-                        if (currentVal !== nextVal) break;
-
-                        // this tile already merged
-                        if (moves[moves.length - 2] === nextIdx && moves[moves.length - 1] > 0) break;
-
-                        // values are same
-                        data[idx] = 0;
-                        data[nextIdx] = currentVal + 1;
-                        moves.push(idx, nextIdx, currentVal + 1);
-                        
-                        moveEndIdx = -1;
+                    if (nextVal !== currentVal) {
                         break;
                     }
 
                     moveEndIdx = nextIdx;
-
-                    //console.log(nextIdx);
+                    movedVal = currentVal + 1;
+                    
+                    //console.log("-", nextIdx);
                 }
 
-                if (moveEndIdx > -1 && movedVal > 0) {
+                if (moveEndIdx !== -1) {
                     data[moveEndIdx] = movedVal;
                     data[moveStartIdx] = 0;
-                    moves.push(moveStartIdx, moveEndIdx, 0);
-                    moveEndIdx = -1;
+                    moves.push(moveStartIdx, moveEndIdx, movedVal);
                 }
+
+                
                 
                 //console.log("---");
                 
@@ -185,7 +184,7 @@ class BoardModel {
             
 
             rowCurr += rowIncrement;
-            colCurr = colStep;
+            colCurr = colStep;// since we use custom idx we need to reset after each loop
         }
 
         return moves;
