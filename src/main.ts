@@ -25,41 +25,6 @@ function update(deltaMS: number): void {
 
   gameManager.update();
 
-  /*
-  if (Input.isPressed("Up")) {
-    model.makeMove(Dir.Up);
-    afterMove()
-  }
-  else if (Input.isPressed("Down")) {
-    model.makeMove(Dir.Down);
-    afterMove()
-  }
-  else if (Input.isPressed("Left")) {
-    model.makeMove(Dir.Left);
-    afterMove()
-  }
-  else if (Input.isPressed("Right")) {
-    const moves = model.makeMove(Dir.Right);
-    console.log("moves")
-    console.log(moves)
-    afterMove()
-  }
-
-  */
   Input.loopClear();
 }
 
-
-function afterMove(): void {
-  const emptyTiles = model.getEmptyTiles();
-  const randomTile = emptyTiles[Math.floor(Math.random() * emptyTiles.length)];
-  model.setCell(randomTile, 1);
-
-  //console.log("new")
-  model.consoleLog();
-  /*
-  console.log("history");
-  const data = model.getHistory(3);
-  if (data === undefined) return;
-  model.consoleLog(data);*/
-}

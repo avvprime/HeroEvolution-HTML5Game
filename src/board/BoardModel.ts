@@ -160,6 +160,10 @@ class BoardModel {
                         break;
                     }
 
+                    if (moves[moves.length - 2] === nextIdx && moves[moves.length - 1] > 0) {
+                        break;
+                    }
+
                     moveEndIdx = nextIdx;
                     movedVal = currentVal + 1;
                     
@@ -169,7 +173,7 @@ class BoardModel {
                 if (moveEndIdx !== -1) {
                     data[moveEndIdx] = movedVal;
                     data[moveStartIdx] = 0;
-                    if (movedVal > 0) moves.push(moveStartIdx, moveEndIdx, movedVal);
+                    if (movedVal > 0) moves.push(moveStartIdx, moveEndIdx, (movedVal > currentVal ? movedVal : 0));
                 }
 
                 

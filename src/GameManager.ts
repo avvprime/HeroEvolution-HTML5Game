@@ -14,6 +14,14 @@ export default class GameManager {
         this._swipeHandler = swipeHandler;
     }
 
+    public update(): void {
+        const dir = this.gatherInput();
+        if (dir > -1) {
+            console.log(this._model.makeMove(dir));
+            this._model.consoleLog();
+        }
+    }
+
     private gatherInput(): number {
         this._swipeHandler.update();
 
@@ -42,11 +50,6 @@ export default class GameManager {
         }
 
         return dir;
-    }
-
-    public update(): void {
-        const dir = this.gatherInput();
-        if (dir > -1) console.log(dir);
     }
 
 
