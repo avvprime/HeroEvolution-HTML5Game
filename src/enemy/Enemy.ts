@@ -1,3 +1,4 @@
+import { ActiveList } from "../ActiveList";
 import LocalEvents from "../LocalEvents";
 
 
@@ -6,14 +7,15 @@ export default class Enemy {
     private _health: number = 0;
     private _events: LocalEvents;
     
-    private _activeList: any[] = [];
+    private _activeList: ActiveList;
 
     constructor() {
         this._events = new LocalEvents(['HealthChanged']);
+        this._activeList = new ActiveList();
     }
 
-    public addToActiveList(func: (() => void), owner: any): void {
-        this._activeList.push({ owner, func });
+    public get activeList(): ActiveList {
+        return this._activeList;
     }
 
     public takeDamage(value: number): void {
@@ -36,6 +38,11 @@ export default class Enemy {
     public off(event: string, callback: (...args: any[]) => void): void {
         this._events.off(event, callback);
     }
+
+    public update(deltaMS: number): void {
+        if (!this._activeList.empty) this._activeList.update(deltaMS);
+    }
+
 
     private onDeath(): void {
 

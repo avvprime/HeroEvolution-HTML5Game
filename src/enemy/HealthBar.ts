@@ -1,6 +1,7 @@
 import { Container } from "pixi.js";
 import type Enemy from "./Enemy";
 import { lerp } from "../util";
+import { ActiveRef } from "../ActiveList";
 
 
 export default class HealthBar extends Container {
@@ -16,11 +17,14 @@ export default class HealthBar extends Container {
         playing: false
     }
 
+    private _activeRef: ActiveRef;
+
     constructor(enemy: Enemy, value: number) {
         super();
         this._parent = enemy;
-
         this._value = value;
+
+        this._activeRef = new ActiveRef(this.update);
 
         enemy.on('HealthChanged', this.updateValue.bind(this));
     }
@@ -42,10 +46,10 @@ export default class HealthBar extends Container {
 
     private updateValue(value: number): void {
         this._value = value;
-        
+        this._parent.activeList.add(this._activeRef);
     }
 
     private onChangeAnimCompleted(): void {
-
+        this._parent.activeList.remove(this._activeRef);
     }
 }
