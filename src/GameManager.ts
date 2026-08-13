@@ -16,10 +16,10 @@ export default class GameManager {
 
     public update(): void {
         const dir = this.gatherInput();
-        if (dir > -1) {
-            console.log(this._model.makeMove(dir));
-            this._model.consoleLog();
-        }
+        if (dir === -1) return;
+
+        const moves = this._model.makeMove(dir);
+        this._model.consoleLog();
     }
 
     private gatherInput(): number {
