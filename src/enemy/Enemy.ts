@@ -1,23 +1,34 @@
+import { Assets, Container, Sprite } from "pixi.js";
 import { ActiveList } from "../ActiveList";
 import LocalEvents from "../LocalEvents";
 import HealthBar from "./HealthBar";
 
 
-export default class Enemy {
+export default class Enemy extends Container{
     
     private _health: number = 0;
     private _events: LocalEvents;
     
     private _activeList: ActiveList;
     
+    private _sprite: Sprite;
     private _healthBar: HealthBar;
 
-    constructor(health: number) {
+    constructor(health: number, textureKey: string) {
+        super();
+
         this._health = health;
         this._events = new LocalEvents(['HealthChanged', 'Died']);
         this._activeList = new ActiveList();
 
-        this._healthBar = new HealthBar(this, health);
+        this._sprite = new Sprite(Assets.get(textureKey));
+        
+        this._healthBar = new HealthBar(this, health, ['healthbarUnder', 'healthbarValue', 'healthbarOver']);
+        this._healthBar.x = this._sprite.width / 2 - this._healthBar.width / 2;
+        this._healthBar.y = -60;
+
+        this.addChild(this._sprite);
+        this.addChild(this._healthBar);
     }
 
     public get activeList(): ActiveList {

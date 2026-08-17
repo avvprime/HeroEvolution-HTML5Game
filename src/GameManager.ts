@@ -1,6 +1,7 @@
 import type BoardModel from "./board/BoardModel";
 import { Dir } from "./common";
 import Enemy from "./enemy/Enemy";
+import type Game from "./Game";
 import Input from "./managers/InputManager";
 import type SwipeHandler from "./SwipeHandler";
 
@@ -15,12 +16,16 @@ export default class GameManager {
         this._enemy.events.off('Died', this._onEnemyDied);
     }
 
-    constructor(model: BoardModel, swipeHandler: SwipeHandler) {
+    constructor(game: Game, model: BoardModel, swipeHandler: SwipeHandler) {
         this._model = model;
         this._swipeHandler = swipeHandler;
 
-        this._enemy = new Enemy(100);
+        this._enemy = new Enemy(100, 'enemy');
         this._enemy.events.on('Died', this._onEnemyDied);
+        this._enemy.x = 100;
+        this._enemy.y = 100;
+
+        game.addChild(this._enemy);
     }
 
     public update(deltaMS: number): void {
