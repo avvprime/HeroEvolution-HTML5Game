@@ -23,7 +23,7 @@ Loop.start();
 
 function update(deltaMS: number): void {
 
-  gameManager.update();
+  gameManager.update(deltaMS);
 
   Input.loopClear();
 }

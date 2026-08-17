@@ -20,13 +20,13 @@ export default class LocalEvents {
             console.log("Events: Couldn't find the requested event at 'off' ", event);
             return;
         }
-
+        
         const idx = events.indexOf(callback);
         if (idx === -1) {
-            console.log("Events: Callback already removed ", callback);
+            console.log("Events: Callback already removed ", event);
             return;
         }
-
+        
         events.splice(idx, 1); 
     }
 

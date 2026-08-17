@@ -24,16 +24,20 @@ export default class HealthBar extends Container {
         this._parent = enemy;
         this._value = value;
 
-        this._activeRef = new ActiveRef(this.update);
-
-        enemy.on('HealthChanged', this.updateValue.bind(this));
+        this._activeRef = new ActiveRef(this.update.bind(this));
+        this._parent.events.on('HealthChanged', this.updateValue.bind(this));
     }
 
-    public update(deltaMS: number): void {
+    public free(): void {
+        this._parent.activeList.remove(this._activeRef);
+        this._parent.events.off('HealthChanged', this.updateValue);
+    }
+
+    private update(deltaMS: number): void {
         if (this._valueChangeAnim.playing) {
             const a = this._valueChangeAnim;
             a.elapsedTime += deltaMS;
-            const t = Math.min(a.elapsedTime / a.duration);
+            const t = Math.min(1, a.elapsedTime / a.duration);
             this._value = lerp(a.from, a.to, t);
 
             if (t >= 1) {
@@ -45,11 +49,18 @@ export default class HealthBar extends Container {
     }
 
     private updateValue(value: number): void {
-        this._value = value;
+        console.log("HealthBar: updateValue");
+
+        this._valueChangeAnim.from = this._value;
+        this._valueChangeAnim.to = value;
+        this._valueChangeAnim.elapsedTime = 0;
+        this._valueChangeAnim.playing = true;
+        
         this._parent.activeList.add(this._activeRef);
     }
 
     private onChangeAnimCompleted(): void {
+        console.log("HealthBar: animCompleted")
         this._parent.activeList.remove(this._activeRef);
     }
 }
