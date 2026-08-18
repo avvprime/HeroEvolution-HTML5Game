@@ -22,10 +22,10 @@ export default class GameManager {
 
         this._enemy = new Enemy(100, 'enemy');
         this._enemy.events.on('Died', this._onEnemyDied);
-        this._enemy.x = 100;
-        this._enemy.y = 100;
+        this._enemy.x = 600;
+        this._enemy.y = 160;
 
-        game.addChild(this._enemy);
+        game.addToWorld(this._enemy);
     }
 
     public update(deltaMS: number): void {
