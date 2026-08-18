@@ -41,6 +41,8 @@ export default class Game {
         this._initialized = true;
 
         ScaleManager.instance.register(this._app.canvas, this._app.renderer);
+        ScaleManager.instance.connect(this.onResize.bind(this));
+        ScaleManager.instance.setScaleMode('cover');
         ScaleManager.instance.setBaseSize(1128, 615);
 
         callback(this._app.canvas);
@@ -83,5 +85,10 @@ export default class Game {
 
         Loop.registerUpdateCallback(this.update.bind(this));
         Loop.start();
+    }
+
+    private onResize(): void {
+        const scale = ScaleManager.instance.scale;
+        this._app.stage.scale.set(scale.x, scale.y);
     }
 }
