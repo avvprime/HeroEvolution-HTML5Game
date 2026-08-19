@@ -5,10 +5,13 @@ export default class Tile extends Sprite {
 
     private _value: number = 0;
 
-    constructor(value: number) {
+    constructor(x: number, y: number, size: number, value: number,) {
         super();
 
         this.value = value;
+        this.position.set(x, y);
+        this.width = size;
+        this.height = size;
     }
 
     public get value(): number { return this._value }

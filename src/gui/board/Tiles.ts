@@ -1,5 +1,5 @@
 import { Container } from "pixi.js";
-import type Tile from "./Tile";
+import Tile from "./Tile";
 
 
 export default class Tiles extends Container {
@@ -9,7 +9,9 @@ export default class Tiles extends Container {
     private _rows: number = 3;
     private _cols: number = 3;
     private _gap: number = 10;
-    private _stepSize: number = 0;
+    private _stepSize: number = 0; // dist from one tile to other
+    private _tileSize: number = 0; // hero size
+    private _tilePadding: number = 0; 
 
     private _tiles: Tile[] = [];
     private _visualBoard: Tile[] = [];
@@ -22,34 +24,50 @@ export default class Tiles extends Container {
 
         this._gap = parentWidth * 0.01;
         
-        this.width = parentWidth * this._relWidth;
-        this.height = this.width;
+        const width = parentWidth * this._relWidth 
 
-        this._stepSize = this.width / rows;
+        this._stepSize = width / rows;
+        this._tileSize = this.calcTileSize(width);
+        this._tilePadding = (this._stepSize - this._tileSize) / 2;
 
-        this.x = parentWidth / 2 - this.width / 2;
-        this.y = parentHeight / 2 - this.height / 2;
+        this.x = parentWidth / 2 - width / 2;
+        this.y = parentHeight / 2 - width / 2;
     }
 
     public addTile(idx: number, val: number): void {
-
+        const row = Math.floor(idx / this._cols);
+        const col = idx % this._cols;
+        const x = col * this._stepSize + this._tilePadding;
+        const y = row * this._stepSize + this._tilePadding;
+        const tile = new Tile(x, y, this._tileSize, val);
+        
+        this.addChild(tile);
+        this._tiles.push(tile);
+        this._visualBoard[idx] = tile;
     }
 
 
     public resize(newParentWidth: number, newParentHeight: number): void {
+        const width = newParentWidth * this._relWidth;
+        
         this._gap = newParentWidth * 0.01;
 
-        this.width = newParentWidth * this._relWidth;
-        this.height = this.width;
+        this._stepSize = width / this._cols;
+        this._tileSize = this.calcTileSize(width);
+        this._tilePadding = (this._stepSize - this._tileSize) / 2;
 
-        this.x = newParentWidth / 2 - this.width / 2;
-        this.y = newParentHeight / 2 - this.height / 2;
+        this.x = newParentWidth / 2 - width / 2;
+        this.y = newParentHeight / 2 - width / 2;
 
-        
+
         // only this sets child size directly to avoid duplicate calcs
-        const tileWidth = (this.width - ((this._cols - 1) * this._gap)) / this._cols;
         const totalTiles = this._tiles.length;
-        for (let i = 0; i < totalTiles; i++) this._tiles[i].resize(tileWidth);
+        for (let i = 0; i < totalTiles; i++) this._tiles[i].resize(this._tileSize);
 
+    }
+
+
+    private calcTileSize(width: number): number {
+        return ((width - ((this._cols - 1) * this._gap)) / this._cols) * 0.8;
     }
 }
