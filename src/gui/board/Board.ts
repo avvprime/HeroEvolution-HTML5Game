@@ -28,7 +28,7 @@ export default class Board extends Container{
         this.addChild(this._tiles);
 
 
-        this._tiles.addTile(2, 1);
+        this._tiles.addTile(1, 1);
     }
 
     public resize(newParentWidth: number, newParentHeight: number): void {
@@ -37,6 +37,7 @@ export default class Board extends Container{
 
         this._bg.resize(width, height);
         this._tileBg.resize(width, height);
+        this._tiles.resize(width, height);
     }
 
 

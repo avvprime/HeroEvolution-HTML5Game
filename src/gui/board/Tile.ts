@@ -20,7 +20,9 @@ export default class Tile extends Sprite {
         this.texture = Assets.get('hero' + this._value);
     }
 
-    public resize(tileSize: number): void {
+    public resize(x: number, y: number, tileSize: number): void {
+        this.x = x;
+        this.y = y;
         this.width = tileSize;
         this.height = tileSize;
     }

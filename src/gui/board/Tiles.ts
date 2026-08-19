@@ -11,9 +11,10 @@ export default class Tiles extends Container {
     private _gap: number = 10;
     private _stepSize: number = 0; // dist from one tile to other
     private _tileSize: number = 0; // hero size
-    private _tilePadding: number = 0; 
+    private _tilePadding: number = 0;
 
     private _tiles: Tile[] = [];
+    private _tilePool: Tile[] = [];
     private _visualBoard: Tile[] = [];
 
     constructor(parentWidth: number, parentHeight: number, rows: number, cols: number) {
@@ -23,8 +24,8 @@ export default class Tiles extends Container {
         this._cols = cols;
 
         this._gap = parentWidth * 0.01;
-        
-        const width = parentWidth * this._relWidth 
+
+        const width = parentWidth * this._relWidth
 
         this._stepSize = width / rows;
         this._tileSize = this.calcTileSize(width);
@@ -40,7 +41,7 @@ export default class Tiles extends Container {
         const x = col * this._stepSize + this._tilePadding;
         const y = row * this._stepSize + this._tilePadding;
         const tile = new Tile(x, y, this._tileSize, val);
-        
+
         this.addChild(tile);
         this._tiles.push(tile);
         this._visualBoard[idx] = tile;
@@ -49,7 +50,7 @@ export default class Tiles extends Container {
 
     public resize(newParentWidth: number, newParentHeight: number): void {
         const width = newParentWidth * this._relWidth;
-        
+
         this._gap = newParentWidth * 0.01;
 
         this._stepSize = width / this._cols;
@@ -61,11 +62,24 @@ export default class Tiles extends Container {
 
 
         // only this sets child size directly to avoid duplicate calcs
-        const totalTiles = this._tiles.length;
-        for (let i = 0; i < totalTiles; i++) this._tiles[i].resize(this._tileSize);
+        for (let r = 0; r < this._rows; r++) {
+            for (let c = 0; c < this._cols; c++) {
+                const idx = r * this._cols + c;
+                if (this._visualBoard[idx] === undefined) continue;
+                
+                const tile = this._visualBoard[idx];
+                const x = c * this._stepSize + this._tilePadding;
+                const y = r * this._stepSize + this._tilePadding;
+                tile.resize(x, y, this._tileSize);
+            }
+        }
+
+        const totalPoolTiles = this._tilePool.length;
+        for (let i = 0; i < totalPoolTiles; i++) {
+            this._tilePool[i].resize(0, 0, this._tileSize);
+        }
 
     }
-
 
     private calcTileSize(width: number): number {
         return ((width - ((this._cols - 1) * this._gap)) / this._cols) * 0.8;
