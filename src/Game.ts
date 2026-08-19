@@ -1,4 +1,4 @@
-import { Application, Assets, Container, Sprite } from "pixi.js";
+import { Application, Assets, Cache, Container, Sprite } from "pixi.js";
 import ScaleManager from "./managers/ScaleManager";
 import BoardModel from "./board/BoardModel";
 import GameManager from "./GameManager";
@@ -6,13 +6,14 @@ import SwipeHandler from "./SwipeHandler";
 import Loop from "./managers/LoopManager";
 import Input from "./managers/InputManager";
 import GUI from "./gui/GUI";
+import { Event, Events } from "./managers/EventManager";
 
 export default class Game {
 
     private _app: Application;
 
-    private _world: Container;
-    private _gui: Container;
+    private _world!: Container;
+    private _gui!: Container;
     
     private _model: BoardModel;
     private _swipeHandler: SwipeHandler;
@@ -24,13 +25,9 @@ export default class Game {
     constructor() {
         this.loadAssets();
 
+        Events.on(Event.GENERATE_TEX_REQ, this.onTexGenRequested.bind(this));
+
         this._app = new Application();
-
-        this._world = new Container();
-        this._gui = new GUI();
-
-        this._app.stage.addChild(this._world);
-        this._app.stage.addChild(this._gui);
 
         this._swipeHandler = new SwipeHandler();
 
@@ -50,11 +47,6 @@ export default class Game {
             height: 615,
         });
         this._initialized = true;
-
-        ScaleManager.instance.register(this._app.canvas, this._app.renderer);
-        ScaleManager.instance.connect(this.onResize.bind(this));
-        ScaleManager.instance.setScaleMode('cover');
-        ScaleManager.instance.setBaseSize(1128, 615);
 
         callback(this._app.canvas);
     }
@@ -89,10 +81,12 @@ export default class Game {
             { alias: 'healthbarUnder', src: 'healthbar-under.png' },
             { alias: 'healthbarValue', src: 'healthbar-value.png' },
             { alias: 'healthbarOver', src: 'healthbar-over.png' },
+            
+            { alias: 'boardBgCornerTop', src: 'board-bg-corner-top.png' },
+            { alias: 'boardBgCornerBottom', src: 'board-bg-corner-bottom.png' },
 
-            { alias: 'boardBg', src: 'board-bg.png' },
-            { alias: 'boardBgCorner', src: 'board-bg-corner.png' },
-
+            { alias: 'brick', src: 'brick.png' },
+            { alias: 'halfBrick', src: 'half-brick.png' },
             { alias: 'ground', src: 'ground.png' },
         ]).then(() => { this.onAssetsLoaded() });
     }
@@ -105,6 +99,12 @@ export default class Game {
 
             return;
         }
+        
+        this._world = new Container();
+        this._app.stage.addChild(this._world);
+
+        this._gui = new GUI();
+        this._app.stage.addChild(this._gui);
 
         this._manager = new GameManager(this, this._model, this._swipeHandler);
 
@@ -114,6 +114,11 @@ export default class Game {
         this._world.addChild(ground);
 
 
+        ScaleManager.instance.register(this._app.canvas, this._app.renderer);
+        ScaleManager.instance.connect(this.onResize.bind(this));
+        ScaleManager.instance.setScaleMode('cover');
+        ScaleManager.instance.setBaseSize(1128, 615);
+
         Loop.registerUpdateCallback(this.update.bind(this));
         Loop.start();
     }
@@ -121,5 +126,11 @@ export default class Game {
     private onResize(): void {
         const scale = ScaleManager.instance.scale;
         this._world.scale.set(scale.x, scale.y);
+    }
+
+    private onTexGenRequested(container: Container, texKey: string): void {
+        const texture = this._app.renderer.generateTexture(container);
+        Cache.set(texKey, texture);
+        Events.emit(Event.GENERATE_TEX_RES, texKey, texture);
     }
 }

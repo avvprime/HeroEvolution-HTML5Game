@@ -1,23 +1,28 @@
 import { Container, Sprite, Texture } from "pixi.js";
 import ScaleManager from "../managers/ScaleManager";
-import Board from "./Board";
-import TopProgress from "./TopProgress";
+import Board from "./board/Board";
+import TopProgress from "./top_progress/TopProgress";
+
 
 const Scale = ScaleManager.instance;
 
 export default class GUI extends Container{
-    
+
+    private _board: Board;
+    private _topProgress: TopProgress;
+
     constructor() {
         super();
 
         Scale.connect(this.onResize.bind(this));
+        const clientSize = Scale.clientSize;
 
         
-        const board = new Board();
-        this.addChild(board);
-        /*
-        const topProgress = new TopProgress();
-        this.addChild(topProgress);*/
+        this._board = new Board(clientSize.width, clientSize.height);
+        this.addChild(this._board);
+        
+        this._topProgress = new TopProgress();
+        this.addChild(this._topProgress);
 
         const topLeft = new Sprite(Texture.WHITE);
         topLeft.tint = 'red';
@@ -34,9 +39,7 @@ export default class GUI extends Container{
         this.x = dx;
         this.y = dy;
 
-        const totalChildren = this.children.length;
-        for (let i = 0; i < totalChildren; i++) {
-            
-        }
+        this._board.resize(clientSize.width, clientSize.height);       
+        this._topProgress.resize(clientSize.width, clientSize.height); 
     }
 }
