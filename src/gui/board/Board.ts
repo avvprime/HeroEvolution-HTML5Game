@@ -1,6 +1,7 @@
 import { Container} from "pixi.js";
 import BoardBackground from "./BoardBackground";
 import TileBackground from "./TileBackground";
+import Tiles from "./Tiles";
 
 
 export default class Board extends Container{
@@ -10,6 +11,7 @@ export default class Board extends Container{
 
     private _bg: BoardBackground;
     private _tileBg: TileBackground;
+    private _tiles: Tiles;
 
     constructor(parentWidth: number, parentHeight: number, rows: number, cols: number) {
         super();
@@ -19,9 +21,11 @@ export default class Board extends Container{
 
         this._bg = new BoardBackground(width, height);
         this._tileBg = new TileBackground(width, height, rows, cols);
+        this._tiles = new Tiles(width, height, rows, cols);
 
         this.addChild(this._bg);
         this.addChild(this._tileBg);
+        this.addChild(this._tiles);
     }
 
     public resize(newParentWidth: number, newParentHeight: number): void {

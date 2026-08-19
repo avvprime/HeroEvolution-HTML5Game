@@ -6,7 +6,7 @@ export default class TileBackground extends Container {
     private _rows: number = 3;
     private _cols: number = 3;
     private _gap: number = 10;
-    private _tileColor: number = 0xdddddd;
+    private _tileColor: number = 0xf2f2f2;
 
     constructor(parentWidth: number, parentHeight: number, rows: number, cols: number) {
         super();

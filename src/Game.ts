@@ -89,7 +89,13 @@ export default class Game {
             { alias: 'halfBrick', src: 'half-brick.png' },
 
             { alias: 'boardTile', src: 'board-tile.png' },
-            
+
+            { alias: 'hero1', src: 'hero-1.png' },
+            { alias: 'hero2', src: 'hero-2.png' },
+            { alias: 'hero3', src: 'hero-3.png' },
+            { alias: 'hero4', src: 'hero-4.png' },
+            { alias: 'hero5', src: 'hero-5.png' },
+
             { alias: 'ground', src: 'ground.png' },
         ]).then(() => { this.onAssetsLoaded() });
     }

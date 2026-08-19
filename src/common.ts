@@ -5,4 +5,3 @@ export const Dir = {
     Down: 2,
     Left: 3
 } as const
-
