@@ -78,7 +78,7 @@ export default class BoardBackground extends Container {
         bricksTop.width = width * 0.3;
         bricksTop.height = height * 0.11;
         bricksTop.x = width * 0.1;
-        bricksTop.y = height * 0.2;
+        bricksTop.y = height * 0.1;
 
         const bricksBottom = this._brickGroup[1];
 
@@ -91,35 +91,37 @@ export default class BoardBackground extends Container {
     private addBricks(): void {
         const brickTexture = Assets.get('brick');
         const halfBrickTexture = Assets.get('halfBrick');
+        const brickColor = 0xf2f2f2;
 
         const brickOne = new Sprite(brickTexture);
-        brickOne.tint = 0xdddddd;
+        brickOne.tint = brickColor;
         brickOne.x = 0;
         brickOne.y = 0;
 
         const brickTwo = new Sprite(brickTexture);
-        brickTwo.tint = 0xdddddd;
+        brickTwo.tint = brickColor;
         brickTwo.x = 75;
         brickTwo.y = 0;
 
         const brickThree = new Sprite(halfBrickTexture);
-        brickThree.tint = 0xdddddd;
-        brickThree.x = 55;
-        brickThree.y = -34;
+        brickThree.tint = brickColor;
+        brickThree.x = 52;
+        brickThree.y = -33;
+        brickThree.scale.x = 1.2;
 
         
         const brickFour = new Sprite(brickTexture);
-        brickFour.tint = 0xdddddd;
+        brickFour.tint = brickColor;
         brickFour.x = 0;
         brickFour.y = 0;
 
         const brickFive = new Sprite(brickTexture);
-        brickFive.tint = 0xdddddd;
+        brickFive.tint = brickColor;
         brickFive.x = 75;
         brickFive.y = 0;
 
         const brickSix = new Sprite(brickTexture);
-        brickSix.tint = 0xdddddd;
+        brickSix.tint = brickColor;
         brickSix.x = 40;
         brickSix.y = 34;
 

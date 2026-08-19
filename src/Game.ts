@@ -81,12 +81,15 @@ export default class Game {
             { alias: 'healthbarUnder', src: 'healthbar-under.png' },
             { alias: 'healthbarValue', src: 'healthbar-value.png' },
             { alias: 'healthbarOver', src: 'healthbar-over.png' },
-            
+
             { alias: 'boardBgCornerTop', src: 'board-bg-corner-top.png' },
             { alias: 'boardBgCornerBottom', src: 'board-bg-corner-bottom.png' },
 
             { alias: 'brick', src: 'brick.png' },
             { alias: 'halfBrick', src: 'half-brick.png' },
+
+            { alias: 'boardTile', src: 'board-tile.png' },
+            
             { alias: 'ground', src: 'ground.png' },
         ]).then(() => { this.onAssetsLoaded() });
     }

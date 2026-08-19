@@ -17,18 +17,20 @@ export default class GUI extends Container{
         Scale.connect(this.onResize.bind(this));
         const clientSize = Scale.clientSize;
 
-        
-        this._board = new Board(clientSize.width, clientSize.height);
-        this.addChild(this._board);
-        
         this._topProgress = new TopProgress();
         this.addChild(this._topProgress);
 
+        
+        this._board = new Board(clientSize.width, clientSize.height, 3, 3);
+        this.addChild(this._board);
+
+
+        /* // mark
         const topLeft = new Sprite(Texture.WHITE);
         topLeft.tint = 'red';
         topLeft.width = 32;
         topLeft.height = 32;
-        this.addChild(topLeft);
+        this.addChild(topLeft);*/
     }
 
     private onResize(newScreenWidth: number, newScreenHeight: number): void {
