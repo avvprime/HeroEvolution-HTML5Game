@@ -45,7 +45,7 @@ export default class TileBackground extends Container {
         this._rows = newRows;
         this._cols = newCols;
 
-        const tileWidth = (this.width - ((this._cols - 1) * this._gap)) / this._cols;
+        const tileWidth = this.calcTileWidth(this.width);
 
         const oldLength = this.children.length;
         const texture = Assets.get('boardTile');
@@ -76,7 +76,7 @@ export default class TileBackground extends Container {
         const gap = this._gap;
 
         const width = newParentWidth * this._relWidth;
-        const tileWidth = (width - ((this._cols - 1) * gap)) / this._cols;
+        const tileWidth = this.calcTileWidth(width);
 
         for (let r = 0; r < this._rows; r++) {
             for (let c = 0; c < this._cols; c++) {
@@ -93,5 +93,9 @@ export default class TileBackground extends Container {
         this.height = width;
         this.x = newParentWidth / 2 - width / 2;
         this.y = newParentHeight / 2 - width / 2;
+    }
+
+    private calcTileWidth(width: number): number {
+        return (width - ((this._cols - 1) * this._gap)) / this._cols;
     }
 }

@@ -4,6 +4,8 @@ import Tile from "./Tile";
 
 export default class Tiles extends Container {
 
+    private _parentWidth: number = 0;
+    private _parentHeight: number = 0;
     private _relWidth: number = 0.8;
 
     private _rows: number = 3;
@@ -20,12 +22,14 @@ export default class Tiles extends Container {
     constructor(parentWidth: number, parentHeight: number, rows: number, cols: number) {
         super();
 
+        this._parentWidth = parentWidth;
+        this._parentHeight = parentHeight;
         this._rows = rows;
         this._cols = cols;
 
         this._gap = parentWidth * 0.01;
 
-        const width = parentWidth * this._relWidth
+        const width = parentWidth * this._relWidth;
 
         this._stepSize = width / rows;
         this._tileSize = this.calcTileSize(width);
@@ -47,8 +51,16 @@ export default class Tiles extends Container {
         this._visualBoard[idx] = tile;
     }
 
+    public expand(newRows: number, newCols: number): void {
+        this._rows = newRows;
+        this._cols = newCols;
+        this.resize(this._parentWidth, this._parentHeight);
+    }
 
     public resize(newParentWidth: number, newParentHeight: number): void {
+        this._parentWidth = newParentWidth;
+        this._parentHeight = newParentHeight;
+
         const width = newParentWidth * this._relWidth;
 
         this._gap = newParentWidth * 0.01;
