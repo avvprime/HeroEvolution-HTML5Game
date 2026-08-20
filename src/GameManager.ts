@@ -1,9 +1,10 @@
-import type BoardModel from "./board/BoardModel";
+import { Assets, Sprite } from "pixi.js";
+import BoardModel from "./board/BoardModel";
 import { Dir, isMobile } from "./common";
 import Enemy from "./enemy/Enemy";
 import type Game from "./Game";
 import Input from "./managers/InputManager";
-import type SwipeHandler from "./SwipeHandler";
+import SwipeHandler from "./SwipeHandler";
 
 
 export default class GameManager {
@@ -16,9 +17,15 @@ export default class GameManager {
         this._enemy.events.off('Died', this._onEnemyDied);
     }
 
-    constructor(game: Game, model: BoardModel, swipeHandler: SwipeHandler) {
-        this._model = model;
-        this._swipeHandler = swipeHandler;
+    constructor(game: Game) {
+        this._swipeHandler = new SwipeHandler();
+        
+        this._model = new BoardModel(3, 3);
+        this._model.setCell(0, 1);
+        this._model.setCell(1, 1);
+        this._model.setCell(2, 1)
+        this._model.setCell(3, 1);
+        this._model.consoleLog();
 
         this._enemy = new Enemy(100, 'enemy');
         this._enemy.events.on('Died', this._onEnemyDied);
@@ -29,6 +36,15 @@ export default class GameManager {
             this._enemy.y = 160;
         }
 
+        const ground = new Sprite(Assets.get('ground'));
+        if (isMobile) {
+            ground.y = 400;
+        }
+        else {
+            ground.x = 420;
+            ground.y = 400;
+        }
+        game.addToWorld(ground);
         game.addToWorld(this._enemy);
     }
 

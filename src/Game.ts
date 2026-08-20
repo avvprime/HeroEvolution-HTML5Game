@@ -1,8 +1,6 @@
-import { Application, Assets, Cache, Container, Sprite } from "pixi.js";
+import { Application, Assets, Cache, Container } from "pixi.js";
 import ScaleManager from "./managers/ScaleManager";
-import BoardModel from "./board/BoardModel";
 import GameManager from "./GameManager";
-import SwipeHandler from "./SwipeHandler";
 import Loop from "./managers/LoopManager";
 import Input from "./managers/InputManager";
 import GUI from "./gui/GUI";
@@ -15,9 +13,6 @@ export default class Game {
 
     private _world!: Container;
     private _gui!: Container;
-    
-    private _model: BoardModel;
-    private _swipeHandler: SwipeHandler;
     private _manager!: GameManager;
 
     private _initialized: boolean = false;
@@ -29,16 +24,6 @@ export default class Game {
         Events.on(Event.GENERATE_TEX_REQ, this.onTexGenRequested.bind(this));
 
         this._app = new Application();
-
-        this._swipeHandler = new SwipeHandler();
-
-        this._model = new BoardModel(3, 3);
-        this._model.setCell(0, 1);
-        this._model.setCell(1, 1);
-        this._model.setCell(2, 1)
-        this._model.setCell(3, 1);
-        this._model.consoleLog();
-
     }
 
     public async init(callback: (canvas: HTMLCanvasElement) => void): Promise<void> {
@@ -58,14 +43,6 @@ export default class Game {
 
     public removeFromWorld(entity: any): void {
         this._world.removeChild(entity);
-    }
-
-    public addChild(entity: any): void {
-        this._app.stage.addChild(entity);
-    }
-
-    public removeChild(entity: any): void {
-        this._app.stage.removeChild(entity);
     }
 
     private update(deltaMS: number): void {
@@ -116,18 +93,7 @@ export default class Game {
         this._gui = new GUI();
         this._app.stage.addChild(this._gui);
 
-        this._manager = new GameManager(this, this._model, this._swipeHandler);
-
-        const ground = new Sprite(Assets.get('ground'));
-        if (isMobile) {
-            ground.y = 400;
-        }
-        else {
-            ground.x = 420;
-            ground.y = 400;
-        }
-        this._world.addChild(ground);
-
+        this._manager = new GameManager(this);
 
         ScaleManager.instance.register(this._app.canvas, this._app.renderer);
         ScaleManager.instance.connect(this.onResize.bind(this));
