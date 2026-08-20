@@ -1,4 +1,5 @@
 import { Assets, Container, Sprite, Texture } from "pixi.js";
+import { isMobile } from "../../common";
 
 
 
@@ -15,19 +16,31 @@ export default class BoardBackground extends Container {
     constructor(width: number, height: number) {
         super();
 
+
+
+        const body = new Sprite(Texture.WHITE);
+        body.width = width;
+        body.height = height;
+        this.addChild(body);
+        this._bg = body;
+
+        if (isMobile) {
+
+            return;
+        }
+
+        
         const bodyShadow = new Sprite(Texture.WHITE);
         bodyShadow.tint = 0x000000;
         bodyShadow.alpha = 0.2;
         bodyShadow.width = 6;
         bodyShadow.height = height
         bodyShadow.x = width;
-
-        const body = new Sprite(Texture.WHITE);
-        body.width = width;
-        body.height = height;
-
         this.addChild(bodyShadow);
-        this.addChild(body);
+        this._bgShadow = bodyShadow;
+        
+
+        
 
         const cornerTop = new Sprite(Assets.get('boardBgCornerTop'));
         cornerTop.x = width;
@@ -39,14 +52,12 @@ export default class BoardBackground extends Container {
 
         this.addChild(cornerTop);
         this.addChild(cornerBottom);
-        
+
         this.addBricks();
 
-        this._bg = body;
-        this._bgShadow = bodyShadow;
         this._cornerTop = cornerTop;
         this._cornerBottom = cornerBottom;
-        
+
         /*
         Events.on(Event.GENERATE_TEX_RES, (key: string, texture: Texture) => {
             if (key !== 'boardBg') return;
@@ -58,14 +69,18 @@ export default class BoardBackground extends Container {
         Events.emit(Event.GENERATE_TEX_REQ, this, 'boardBg');*/
     }
 
-    public resize(width: number, height: number): void {       
-        
+    public resize(width: number, height: number): void {
+
         this._bg.width = width;
         this._bg.height = height;
 
+        if (isMobile) {
+            return;
+        }
+
         this._cornerTop.x = width;
         this._cornerTop.y = height * 0.1;
-        
+
         this._cornerBottom.x = width;
         this._cornerBottom.y = height - this._cornerBottom.height;
 
@@ -74,11 +89,15 @@ export default class BoardBackground extends Container {
         this._bgShadow.height = height - ((height * 0.1) + this._cornerTop.height + this._cornerBottom.height);
 
         const bricksTop = this._brickGroup[0];
-        
+
         bricksTop.width = width * 0.3;
         bricksTop.height = height * 0.11;
         bricksTop.x = width * 0.1;
         bricksTop.y = height * 0.1;
+        //bricksTop.width = width * (isMobile ? 0.1 : 0.3);
+        //bricksTop.height = height * (isMobile ? 0.05 : 0.11);
+        //bricksTop.x = width * (isMobile ? 0.01 : 0.1);
+        //bricksTop.y = height * (isMobile ? 0.05: 0.1);
 
         const bricksBottom = this._brickGroup[1];
 
@@ -91,7 +110,7 @@ export default class BoardBackground extends Container {
     private addBricks(): void {
         const brickTexture = Assets.get('brick');
         const halfBrickTexture = Assets.get('halfBrick');
-        const brickColor = 0xf2f2f2;
+        const brickColor = 0xedf2f5;
 
         const brickOne = new Sprite(brickTexture);
         brickOne.tint = brickColor;
@@ -109,7 +128,7 @@ export default class BoardBackground extends Container {
         brickThree.y = -33;
         brickThree.scale.x = 1.2;
 
-        
+
         const brickFour = new Sprite(brickTexture);
         brickFour.tint = brickColor;
         brickFour.x = 0;

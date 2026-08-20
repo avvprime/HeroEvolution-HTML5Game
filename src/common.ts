@@ -5,3 +5,5 @@ export const Dir = {
     Down: 2,
     Left: 3
 } as const
+
+export const isMobile = ('ontouchstart' in window || navigator.maxTouchPoints > 0);

@@ -2,6 +2,7 @@ import { Container} from "pixi.js";
 import BoardBackground from "./BoardBackground";
 import TileBackground from "./TileBackground";
 import Tiles from "./Tiles";
+import { isMobile } from "../../common";
 
 
 export default class Board extends Container{
@@ -15,6 +16,16 @@ export default class Board extends Container{
 
     constructor(parentWidth: number, parentHeight: number, rows: number, cols: number) {
         super();
+
+        if (isMobile) {
+            this._relWidth = 1;
+            this._relHeight = 0.5;
+            this.y = parentHeight - (parentHeight * this._relHeight);
+        }
+        else {
+            this._relWidth = 0.4;
+            this._relHeight = 1;
+        }
 
         const width = parentWidth * this._relWidth;
         const height = parentHeight * this._relHeight;
@@ -30,10 +41,11 @@ export default class Board extends Container{
 
         this._tiles.addTile(1, 1);
 
+        /*
         setTimeout(() => {
             this._tileBg.expand(4, 4);
             this._tiles.expand(4, 4);
-        }, 1000);
+        }, 1000);*/
     }
 
     public resize(newParentWidth: number, newParentHeight: number): void {

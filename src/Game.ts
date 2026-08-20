@@ -7,6 +7,7 @@ import Loop from "./managers/LoopManager";
 import Input from "./managers/InputManager";
 import GUI from "./gui/GUI";
 import { Event, Events } from "./managers/EventManager";
+import { isMobile } from "./common";
 
 export default class Game {
 
@@ -43,8 +44,8 @@ export default class Game {
     public async init(callback: (canvas: HTMLCanvasElement) => void): Promise<void> {
         await this._app.init({
             backgroundColor: '#94e6ff',
-            width: 1128,
-            height: 615,
+            width: isMobile ? 615 : 1128,
+            height: isMobile ? 1128 : 615,
         });
         this._initialized = true;
 
@@ -118,15 +119,21 @@ export default class Game {
         this._manager = new GameManager(this, this._model, this._swipeHandler);
 
         const ground = new Sprite(Assets.get('ground'));
-        ground.x = 420;
-        ground.y = 400;
+        if (isMobile) {
+            ground.y = 400;
+        }
+        else {
+            ground.x = 420;
+            ground.y = 400;
+        }
         this._world.addChild(ground);
 
 
         ScaleManager.instance.register(this._app.canvas, this._app.renderer);
         ScaleManager.instance.connect(this.onResize.bind(this));
         ScaleManager.instance.setScaleMode('cover');
-        ScaleManager.instance.setBaseSize(1128, 615);
+        if (isMobile) ScaleManager.instance.setBaseSize(615, 1128);
+        else ScaleManager.instance.setBaseSize(1128, 615);
 
         Loop.registerUpdateCallback(this.update.bind(this));
         Loop.start();

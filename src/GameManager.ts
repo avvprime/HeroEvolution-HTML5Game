@@ -1,5 +1,5 @@
 import type BoardModel from "./board/BoardModel";
-import { Dir } from "./common";
+import { Dir, isMobile } from "./common";
 import Enemy from "./enemy/Enemy";
 import type Game from "./Game";
 import Input from "./managers/InputManager";
@@ -22,8 +22,12 @@ export default class GameManager {
 
         this._enemy = new Enemy(100, 'enemy');
         this._enemy.events.on('Died', this._onEnemyDied);
-        this._enemy.x = 600;
-        this._enemy.y = 160;
+        if (isMobile) {
+            this._enemy.y = 160;
+        }else {
+            this._enemy.x = 600;
+            this._enemy.y = 160;
+        }
 
         game.addToWorld(this._enemy);
     }
