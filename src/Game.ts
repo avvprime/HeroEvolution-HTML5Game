@@ -1,24 +1,33 @@
-import { Application, Assets, Cache, Container } from "pixi.js";
-import ScaleManager from "./managers/ScaleManager";
+import { Application, Assets, Container, Sprite, type ContainerChild, type Renderer } from "pixi.js";
 import GameManager from "./GameManager";
-import Loop from "./managers/LoopManager";
-import Input from "./managers/InputManager";
-import GUI from "./gui/GUI";
 import { Event, Events } from "./managers/EventManager";
 import { isMobile } from "./common";
+import GUI from "./gui/GUI";
+import Enemy from "./enemy/Enemy";
+import BoardModel from "./board/BoardModel";
+import ScaleManager from "./managers/ScaleManager";
+import Loop from "./managers/LoopManager";
+import Input from "./managers/InputManager";
+import { ActiveList } from "./ActiveList";
 
 export default class Game {
 
     private _app!: Application;
-
     private _world!: Container;
-    private _gui!: Container;
+    private _gui!: GUI;
+    
+    private _boardModel!: BoardModel;
+    private _enemy!: Enemy; 
+    
     private _manager!: GameManager;
+
+    private _activeList: ActiveList;
 
     private _initialized: boolean = false;
 
-    
     constructor() {
+        this._activeList = new ActiveList();
+
         this.loadAssets();
     }
 
@@ -33,29 +42,64 @@ export default class Game {
         this._initialized = true;
 
         callback(this._app.canvas);
+        
+        Loop.registerUpdateCallback(this.update.bind(this));
+        Loop.start();
 
-        Events.on(Event.GENERATE_TEX_REQ, this.onTexGenRequested.bind(this));
     }
 
-    public addToWorld(entity: any): void {
-        this._world.addChild(entity);
+    public get activeList(): ActiveList { return this._activeList }
+
+    public addGround(): void {
+        const ground = new Sprite(Assets.get('ground'));
+        if (isMobile) {
+            ground.y = 400;
+        }
+        else {
+            ground.x = 420;
+            ground.y = 400;
+        }
+        this._world.addChild(ground);
     }
 
-    public removeFromWorld(entity: any): void {
-        this._world.removeChild(entity);
+    public addEnemy(): void {
+        const enemy = new Enemy(this, 100, 'enemy');
+        enemy.events.on('Died', () => { /* enemy.events.off('Died', this)  */ } );
+        if (isMobile) {
+            enemy.y = 160;
+        } else {
+            enemy.x = 600;
+            enemy.y = 160;
+        }
+        this._world.addChild(enemy);
+        this._enemy = enemy;
     }
 
-    private update(deltaMS: number): void {
-        this._manager.update(deltaMS);
+    public addBoardModel(): void {
+        const model = new BoardModel(3, 3);
+        model.setCell(0, 1);
+        model.setCell(1, 1);
+        model.setCell(2, 1)
+        model.setCell(3, 1);
+        model.consoleLog();
 
+        this._boardModel = model;
+    }
 
-        Input.loopClear();
+    public makeBoardMove(dir: number): void {
+        const moves = this._boardModel.makeMove(dir);
+        //this._model.consoleLog();
+        Events.emit(Event.BOARD_MOVE, dir, moves);
+    }
+
+    public damageEnemy(): void {
+        this._enemy.takeDamage(10);
     }
 
     private loadAssets(): void {
         Assets.load([
             { alias: 'enemy', src: 'enemy.png' },
-            
+
             { alias: 'healthbarUnder', src: 'healthbar-under.png' },
             { alias: 'healthbarValue', src: 'healthbar-value.png' },
             { alias: 'healthbarOver', src: 'healthbar-over.png' },
@@ -86,23 +130,22 @@ export default class Game {
 
             return;
         }
-        
+
         this._world = new Container();
-        this._app.stage.addChild(this._world);
+        this._gui = new GUI(this);
+        this._app.stage.addChild(this._world, this._gui);
 
-        this._gui = new GUI();
-        this._app.stage.addChild(this._gui);
-
-        this._manager = new GameManager(this);
-
-        ScaleManager.instance.register(this._app.canvas, this._app.renderer);
+         ScaleManager.instance.register(this._app.canvas, this._app.renderer);
         ScaleManager.instance.connect(this.onResize.bind(this));
         ScaleManager.instance.setScaleMode('cover');
-        if (isMobile) ScaleManager.instance.setBaseSize(615, 1128);
-        else ScaleManager.instance.setBaseSize(1128, 615);
+        isMobile ? ScaleManager.instance.setBaseSize(615, 1128) : ScaleManager.instance.setBaseSize(1128, 615);
 
-        Loop.registerUpdateCallback(this.update.bind(this));
-        Loop.start();
+        this._manager = new GameManager(this);
+    }
+
+    private update(deltaMS: number): void {
+        this._activeList.update(deltaMS);
+        Input.loopClear();
     }
 
     private onResize(): void {
@@ -110,8 +153,4 @@ export default class Game {
         this._world.scale.set(scale.x, scale.y);
     }
 
-    private onTexGenRequested(container: Container, texKey: string): void {
-        const texture = this._app.renderer.generateTexture(container);
-        Events.emit(Event.GENERATE_TEX_RES, texKey, texture);
-    }
 }

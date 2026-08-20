@@ -1,7 +1,8 @@
 import { Assets, Container, Sprite } from "pixi.js";
-import { ActiveList } from "../ActiveList";
+import { ActiveList, ActiveRef } from "../ActiveList";
 import LocalEvents from "../LocalEvents";
 import HealthBar from "./HealthBar";
+import type Game from "../Game";
 
 
 export default class Enemy extends Container{
@@ -10,16 +11,24 @@ export default class Enemy extends Container{
     private _events: LocalEvents;
     
     private _activeList: ActiveList;
+    private _activeRef: ActiveRef;
     
     private _sprite: Sprite;
     private _healthBar: HealthBar;
 
-    constructor(health: number, textureKey: string) {
+    private _parent: Game;
+
+    constructor(parent: Game, health: number, textureKey: string) {
         super();
+        
+        this._parent = parent;
 
         this._health = health;
         this._events = new LocalEvents(['HealthChanged', 'Died']);
         this._activeList = new ActiveList();
+
+        this._activeRef = new ActiveRef(this.update.bind(this));
+        this._parent.activeList.add(this._activeRef);
 
         this._sprite = new Sprite(Assets.get(textureKey));
         
@@ -55,14 +64,15 @@ export default class Enemy extends Container{
         this._events.emit('HealthChanged', this._health);
     }
 
-    public update(deltaMS: number): void {
+    public free(): void {
+        this._healthBar.free();
+        this._parent.activeList.remove(this._activeRef);
+    }
+
+    private update(deltaMS: number): void {
         if (!this._activeList.empty) {
             this._activeList.update(deltaMS);
         }
-    }
-
-    public free(): void {
-        this._healthBar.free();
     }
 
     private onDeath(): void {

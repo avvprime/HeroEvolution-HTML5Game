@@ -3,6 +3,9 @@ import BoardBackground from "./BoardBackground";
 import TileBackground from "./TileBackground";
 import Tiles from "./Tiles";
 import { isMobile } from "../../common";
+import { Event, Events } from "../../managers/EventManager";
+import { ActiveRef } from "../../ActiveList";
+import type GUI from "../GUI";
 
 
 export default class Board extends Container{
@@ -14,8 +17,14 @@ export default class Board extends Container{
     private _tileBg: TileBackground;
     private _tiles: Tiles;
 
-    constructor(parentWidth: number, parentHeight: number, rows: number, cols: number) {
+    private _activeRef: ActiveRef;
+
+    private _parent: GUI;
+    constructor(parent: GUI, parentWidth: number, parentHeight: number, rows: number, cols: number) {
         super();
+
+        this._parent = parent;
+        this._activeRef = new ActiveRef(this.update.bind(this));
 
         if (isMobile) {
             this._relWidth = 1;
@@ -48,6 +57,14 @@ export default class Board extends Container{
         }, 1000);*/
     }
 
+    public update(deltaMS: number): void {
+        
+    }
+
+    public makeMove(moves: number[]): void {
+        //console.log("GUIBoard: ", moves);
+    }
+
     public resize(newParentWidth: number, newParentHeight: number): void {
         const width = newParentWidth * this._relWidth;
         const height = newParentHeight * this._relHeight;
@@ -57,5 +74,7 @@ export default class Board extends Container{
         this._tiles.resize(width, height);
     }
 
-    
-}
+    public free(): void {
+        this._parent.activeList.remove(this._activeRef);
+    }
+}   

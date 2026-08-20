@@ -1,64 +1,40 @@
-import { Assets, Sprite } from "pixi.js";
-import BoardModel from "./board/BoardModel";
-import { Dir, isMobile } from "./common";
-import Enemy from "./enemy/Enemy";
+
+import { ActiveRef } from "./ActiveList";
+import { Dir } from "./common";
 import type Game from "./Game";
+import { Event, Events } from "./managers/EventManager";
 import Input from "./managers/InputManager";
 import SwipeHandler from "./SwipeHandler";
 
 
 export default class GameManager {
 
-    private _model: BoardModel;
+    
     private _swipeHandler: SwipeHandler;
-    private _enemy: Enemy;
 
-    private _onEnemyDied = () => {
-        this._enemy.events.off('Died', this._onEnemyDied);
-    }
+    private _game: Game;
+    private _activeRef: ActiveRef;
 
     constructor(game: Game) {
+        this._game = game;
+        
         this._swipeHandler = new SwipeHandler();
         
-        this._model = new BoardModel(3, 3);
-        this._model.setCell(0, 1);
-        this._model.setCell(1, 1);
-        this._model.setCell(2, 1)
-        this._model.setCell(3, 1);
-        this._model.consoleLog();
-
-        this._enemy = new Enemy(100, 'enemy');
-        this._enemy.events.on('Died', this._onEnemyDied);
-        if (isMobile) {
-            this._enemy.y = 160;
-        }else {
-            this._enemy.x = 600;
-            this._enemy.y = 160;
-        }
-
-        const ground = new Sprite(Assets.get('ground'));
-        if (isMobile) {
-            ground.y = 400;
-        }
-        else {
-            ground.x = 420;
-            ground.y = 400;
-        }
-        game.addToWorld(ground);
-        game.addToWorld(this._enemy);
+        this._activeRef = new ActiveRef(this.update.bind(this));
+        this._game.activeList.add(this._activeRef);
+        
+        this._game.addBoardModel();
+        this._game.addEnemy();
+        this._game.addGround();
     }
 
-    public update(deltaMS: number): void {
+    private update(): void {
         const dir = this.gatherInput();
         if (dir !== -1) {
-            const moves = this._model.makeMove(dir);
-            //this._model.consoleLog();
-            this._enemy.takeDamage(10);
+            this._game.makeBoardMove(dir);
+            this._game.damageEnemy();
         }
 
-
-        this._enemy.update(deltaMS);
-        
     }
 
     private gatherInput(): number {
@@ -90,6 +66,8 @@ export default class GameManager {
 
         return dir;
     }
+
+    
 
 
 }

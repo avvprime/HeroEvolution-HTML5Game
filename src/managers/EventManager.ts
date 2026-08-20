@@ -11,20 +11,14 @@ export const Event = {
     REWARDED_AD_REWARDED: 7,
     REWARDED_AD_FAILED: 8,
 
-    LEVEL_COMPLETED: 9,
-
-    ASSETS_LOADED: 11,
-    AUDIO_FILES_LOADED: 12,
-
-    POINTER_DOWN: 13,
-    NEXT_LEVEL_BTN_PRESSED: 14,
+    BOARD_MOVE: 9,
 
     GENERATE_TEX_REQ: 15,
     GENERATE_TEX_RES: 16,
 
 } as const;
 
-export type Event = typeof Event[keyof typeof Event];
+export type Event = number;
 
 export type Listener = (...args: any[]) => void;
 
