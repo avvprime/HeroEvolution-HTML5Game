@@ -9,7 +9,7 @@ import { isMobile } from "./common";
 
 export default class Game {
 
-    private _app: Application;
+    private _app!: Application;
 
     private _world!: Container;
     private _gui!: Container;
@@ -20,13 +20,11 @@ export default class Game {
     
     constructor() {
         this.loadAssets();
-
-        Events.on(Event.GENERATE_TEX_REQ, this.onTexGenRequested.bind(this));
-
-        this._app = new Application();
     }
 
     public async init(callback: (canvas: HTMLCanvasElement) => void): Promise<void> {
+        this._app = new Application();
+
         await this._app.init({
             backgroundColor: '#94e6ff',
             width: isMobile ? 615 : 1128,
@@ -35,6 +33,8 @@ export default class Game {
         this._initialized = true;
 
         callback(this._app.canvas);
+
+        Events.on(Event.GENERATE_TEX_REQ, this.onTexGenRequested.bind(this));
     }
 
     public addToWorld(entity: any): void {
@@ -112,7 +112,6 @@ export default class Game {
 
     private onTexGenRequested(container: Container, texKey: string): void {
         const texture = this._app.renderer.generateTexture(container);
-        Cache.set(texKey, texture);
         Events.emit(Event.GENERATE_TEX_RES, texKey, texture);
     }
 }
