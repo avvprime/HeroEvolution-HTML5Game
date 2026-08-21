@@ -1,10 +1,10 @@
-import { Assets, Sprite } from "pixi.js";
+import { Assets, Container, Sprite } from "pixi.js";
 import type Tiles from "./Tiles";
 import { ActiveRef } from "../../ActiveList";
-import { lerp } from "../../util";
+import { easeOutBack, lerp } from "../../util";
 
 
-export default class Tile extends Sprite {
+export default class Tile extends Container {
 
     private _moveAnim: any = {
         from: { x: 0, y: 0 },
@@ -28,37 +28,44 @@ export default class Tile extends Sprite {
     private _parent: Tiles;
     private _activeRef: ActiveRef;
 
+    private _totalActiveAnims: number = 0;
+
+    private _body: Sprite;
+
     constructor(parent: Tiles, x: number, y: number, size: number, value: number) {
         super();
 
+        this._body = new Sprite(Assets.get('hero' + value));
+        this._body.pivot.set(size / 2);
+        this._body.position.set(size / 2);
+        this.addChild(this._body);
+
         this._parent = parent;
         this._activeRef = new ActiveRef(this.update.bind(this));
-        this.value = value;
         this.position.set(x, y);
         this.width = size;
         this.height = size;
+        this.setValue(value);
     }
 
     public get value(): number { return this._value }
-    public set value(val: number) {
-        this._value = val;
-        this.texture = Assets.get('hero' + this._value);
-    }
-
+    
     public move(x: number, y: number, val: number, boardIdx: number): void {
 
         if (this._moveAnim.playing) {
             if (this._targetVal > 0) {
                 this._parent.onMergeTileMoved(this._boardIdx);
-                this.value = this._targetVal;
+                this.setValue(this._targetVal);
             }
         }
 
+        this._targetVal = val;
+        this._boardIdx = boardIdx;
 
         const dx = x - this.x;
         const dy = y - this.y;
         const dist = Math.hypot(dx, dy);
-        const speed = 3;
+        const speed = 1;
         
         this._moveAnim.duration = dist / speed;
         this._moveAnim.from.x = this.x;
@@ -68,10 +75,7 @@ export default class Tile extends Sprite {
         this._moveAnim.elapsedTime = 0;
         this._moveAnim.playing = true;
 
-        this._parent.activeList.add(this._activeRef);
-
-        this._targetVal = val;
-        this._boardIdx = boardIdx;
+        this.onAnimAdded();
     }
 
     public disappear(): void {
@@ -86,28 +90,59 @@ export default class Tile extends Sprite {
         this.height = tileSize;
     }
 
+    private setValue(val: number) {
+        this._value = val;
+        this._body.texture = Assets.get('hero' + this._value);
+        
+        this._mergeScaleUpAnim.elapsedTime = 0;
+        this._mergeScaleUpAnim.playing = true;
+        this.onAnimAdded();
+    }
+
     private update(deltaMS: number): void {
         if (this._moveAnim.playing) {
             const a = this._moveAnim;
             a.elapsedTime += deltaMS;
             const t = Math.min(1, a.elapsedTime / a.duration);
-            const x = lerp(a.from.x, a.to.x, t);
-            const y = lerp(a.from.y, a.to.y, t);
+            const easedT = easeOutBack(t);
+            const x = lerp(a.from.x, a.to.x, easedT);
+            const y = lerp(a.from.y, a.to.y, easedT);
             this.position.set(x, y);
             if (t >= 1) {
                 a.elapsedTime = 0;
                 a.playing = false;
+                this.onAnimFinished();
                 this.onMoved();
             }
         }
+        
+        if (this._mergeScaleUpAnim.playing) {
+            const a = this._mergeScaleUpAnim;
+            a.elapsedTime += deltaMS;
+            const t = Math.min(1, a.elapsedTime / a.duration);
+            this._body.scale.set(lerp(a.from, a.to, easeOutBack(t)));
+            if (t >= 1) {
+                a.elapsedTime = 0;
+                a.playing = false;
+                this.onAnimFinished();
+            }
+        }
+    }
+
+    private onAnimAdded(): void {
+        if (this._totalActiveAnims === 0) this._parent.activeList.add(this._activeRef);
+        this._totalActiveAnims++;
+    }
+
+    private onAnimFinished(): void {
+        this._totalActiveAnims--;
+        if (this._totalActiveAnims === 0) this._parent.activeList.remove(this._activeRef);
     }
 
     private onMoved(): void {
         if (this._targetVal > 0) {
             this._parent.onMergeTileMoved(this._boardIdx);
-            this.value = this._targetVal;
+            this.setValue(this._targetVal);
         }
-
-        this._parent.activeList.remove(this._activeRef);
     }
 }
