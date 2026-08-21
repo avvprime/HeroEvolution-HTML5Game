@@ -12,6 +12,7 @@ export const Event = {
     REWARDED_AD_FAILED: 8,
 
     BOARD_MOVE: 9,
+    BOARD_ADD_TILE: 10,
 
     GENERATE_TEX_REQ: 15,
     GENERATE_TEX_RES: 16,

@@ -41,6 +41,7 @@ export default class GUI extends Container{
         this.addChild(this._board);
 
         this._boundEventListeners[Event.BOARD_MOVE] = this.onBoardMove.bind(this);
+        this._boundEventListeners[Event.BOARD_ADD_TILE] = this.onBoardAddTile.bind(this);
 
         this.addEventListeners();
 
@@ -76,6 +77,10 @@ export default class GUI extends Container{
 
     private update(deltaMS: number): void {
         this._activeList.update(deltaMS);
+    }
+
+    private onBoardAddTile(idx: number, val: number): void {
+        this._board.addTile(idx, val);
     }
 
     private onBoardMove(_dir: number, moves: number[]): void {

@@ -1,5 +1,7 @@
 import { Container } from "pixi.js";
 import Tile from "./Tile";
+import { ActiveList, ActiveRef } from "../../ActiveList";
+import type Board from "./Board";
 
 
 export default class Tiles extends Container {
@@ -17,11 +19,19 @@ export default class Tiles extends Container {
 
     private _tiles: Tile[] = [];
     private _tilePool: Tile[] = [];
-    private _visualBoard: Tile[] = [];
+    private _visualBoard: (Tile | undefined)[] = [];
+    private _tilesToDisappear = new Map<number, Tile>();
 
-    constructor(parentWidth: number, parentHeight: number, rows: number, cols: number) {
+    private _holdVec2: { x: number, y: number } = { x: 0, y: 0 }
+
+    private _parent: Board;
+    private _activeList: ActiveList;
+    private _activeRef: ActiveRef;
+
+    constructor(parent: Board, parentWidth: number, parentHeight: number, rows: number, cols: number) {
         super();
 
+        this._parent = parent;
         this._parentWidth = parentWidth;
         this._parentHeight = parentHeight;
         this._rows = rows;
@@ -37,6 +47,43 @@ export default class Tiles extends Container {
 
         this.x = parentWidth / 2 - width / 2;
         this.y = parentHeight / 2 - width / 2;
+
+        this._activeList = new ActiveList();
+        this._activeRef = new ActiveRef(this.update.bind(this));
+        this._parent.activeList.add(this._activeRef);
+    }
+
+    public get activeList(): ActiveList { return this._activeList }
+
+    public makeMove(moves: number[]): void {
+        const totalMoves = moves.length / 3;
+        for (let i = 0; i < totalMoves; i++) {
+            const from = moves[i * 3];
+            const to = moves[i * 3 + 1];
+            const val = moves[i * 3 + 2];
+            this.calcTargetPos(to, this._holdVec2);
+
+            const tileToMove = this._visualBoard[from];
+
+            if (tileToMove === undefined) {
+                console.warn("Tiles: No tile found at: ", from);
+                continue;
+            }
+
+            if (val > 0) this._tilesToDisappear.set(to, this._visualBoard[to]!);
+            
+            tileToMove.move(this._holdVec2.x, this._holdVec2.y, val, to);
+            
+            this._visualBoard[from] = undefined;
+            this._visualBoard[to] = tileToMove;
+        }
+    }
+
+    public onMergeTileMoved(tileToDisappearBoardIdx: number): void {
+        const tile = this._tilesToDisappear.get(tileToDisappearBoardIdx)!;
+        tile.disappear();
+        this._tilePool.push(tile);
+        this._tilesToDisappear.delete(tileToDisappearBoardIdx);
     }
 
     public addTile(idx: number, val: number): void {
@@ -44,7 +91,7 @@ export default class Tiles extends Container {
         const col = idx % this._cols;
         const x = col * this._stepSize + this._tilePadding;
         const y = row * this._stepSize + this._tilePadding;
-        const tile = new Tile(x, y, this._tileSize, val);
+        const tile = new Tile(this, x, y, this._tileSize, val);
 
         this.addChild(tile);
         this._tiles.push(tile);
@@ -93,7 +140,22 @@ export default class Tiles extends Container {
 
     }
 
+    public free(): void {
+        
+    }
+
+    private update(deltaMS: number): void {
+        this._activeList.update(deltaMS);
+    }
+
     private calcTileSize(width: number): number {
         return ((width - ((this._cols - 1) * this._gap)) / this._cols) * 0.8;
+    }
+
+    private calcTargetPos(targetIdx: number, outVec: { x: number, y: number }): void {
+        const row = Math.floor(targetIdx / this._cols);
+        const col = targetIdx % this._cols;
+        outVec.x = this._stepSize * col + this._tilePadding;
+        outVec.y = this._stepSize * row + this._tilePadding;
     }
 }

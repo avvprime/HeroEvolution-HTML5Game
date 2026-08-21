@@ -47,8 +47,7 @@ export class ActiveList {
     }
 
     public update(deltaMS: number): void {
-        const total = this._list.length;
-        for (let i = 0; i < total; i++) {
+        for (let i = 0; i < this._list.length; i++) {
             this._list[i].update(deltaMS);
         }
     }

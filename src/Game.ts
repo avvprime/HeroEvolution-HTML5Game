@@ -76,24 +76,28 @@ export default class Game {
     }
 
     public addBoardModel(): void {
-        const model = new BoardModel(3, 3);
-        model.setCell(0, 1);
-        model.setCell(1, 1);
-        model.setCell(2, 1)
-        model.setCell(3, 1);
-        model.consoleLog();
+        this._boardModel = new BoardModel(3, 3);
+    }
+    
+    public logBoardModel(): void {
+        this._boardModel.consoleLog();
+    }
 
-        this._boardModel = model;
+    public addBoardTile(idx: number, val: number): void {
+        this._boardModel.setCell(idx, val);
+        Events.emit(Event.BOARD_ADD_TILE, idx, val);
     }
 
     public makeBoardMove(dir: number): void {
         const moves = this._boardModel.makeMove(dir);
-        //this._model.consoleLog();
-        Events.emit(Event.BOARD_MOVE, dir, moves);
+        this._boardModel.consoleLog();
+
+        if (moves.length > 0) Events.emit(Event.BOARD_MOVE, dir, moves);
+        
     }
 
     public damageEnemy(): void {
-        this._enemy.takeDamage(10);
+        //this._enemy.takeDamage(10);
     }
 
     private loadAssets(): void {

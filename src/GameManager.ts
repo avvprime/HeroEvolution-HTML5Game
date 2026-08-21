@@ -26,6 +26,13 @@ export default class GameManager {
         this._game.addBoardModel();
         this._game.addEnemy();
         this._game.addGround();
+
+
+        this._game.addBoardTile(0, 1);
+        this._game.addBoardTile(1, 1);
+        this._game.addBoardTile(2, 1)
+        this._game.addBoardTile(3, 1);
+        this._game.logBoardModel();
     }
 
     private update(): void {
