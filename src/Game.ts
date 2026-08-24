@@ -123,6 +123,9 @@ export default class Game {
             { alias: 'hero5', src: 'hero-5.png' },
 
             { alias: 'ground', src: 'ground.png' },
+
+            { alias: 'blade', src: 'blade.png' }
+
         ]).then(() => { this.onAssetsLoaded() });
     }
 

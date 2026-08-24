@@ -5,6 +5,7 @@ import TopProgress from "./top_progress/TopProgress";
 import { ActiveList, ActiveRef } from "../ActiveList";
 import type Game from "../Game";
 import { Event, Events } from "../managers/EventManager";
+import ScoreBar from "./ScoreBar";
 
 
 const Scale = ScaleManager.instance;
@@ -16,7 +17,7 @@ export default class GUI extends Container{
 
     private _board: Board;
     private _topProgress: TopProgress;
-
+    
     private _parent: Game;
 
     private _boundEventListeners: Record<Event, ((...args: any[]) => void)> = {}
