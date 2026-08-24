@@ -1,4 +1,4 @@
-import { Application, Assets, Container, Sprite, type ContainerChild, type Renderer } from "pixi.js";
+import { Application, Assets, BitmapFont, Container, Sprite, type ContainerChild, type Renderer } from "pixi.js";
 import GameManager from "./GameManager";
 import { Event, Events } from "./managers/EventManager";
 import { isMobile } from "./common";
@@ -25,8 +25,21 @@ export default class Game {
 
     private _initialized: boolean = false;
 
+    private _score: number = 0;
+
     constructor() {
         this._activeList = new ActiveList();
+
+        document.fonts.load('16px "Slackey"').then(() => {
+            BitmapFont.install({
+                name: 'SlackeyBitmap',
+                style: {
+                    fontFamily: 'Slackey',
+                    fontSize: 32,
+                    fill: '#ffffff'
+                }
+            });
+        });
 
         this.loadAssets();
     }
@@ -93,7 +106,18 @@ export default class Game {
         const moves = this._boardModel.makeMove(dir);
         this._boardModel.consoleLog();
 
-        if (moves.length > 0) Events.emit(Event.BOARD_MOVE, dir, moves);
+        if (moves.length === 0) return;
+
+        Events.emit(Event.BOARD_MOVE, dir, moves);
+        
+        let score = 0;
+        const totalMoves = moves.length / 3;
+        for (let i = 0; i < totalMoves; i++) score += moves[i * 3 + 2];
+        this._score += score;
+        Events.emit(Event.SCORE_UPDATE, this._score);
+    }
+
+    public calcScore(): void {
         
     }
 
@@ -125,7 +149,7 @@ export default class Game {
 
             { alias: 'ground', src: 'ground.png' },
 
-            { alias: 'blade', src: 'blade.png' }
+            { alias: 'blade', src: 'blade.png' },
 
         ]).then(() => { this.onAssetsLoaded() });
     }

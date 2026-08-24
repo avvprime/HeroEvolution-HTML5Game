@@ -5,7 +5,7 @@ import Tiles from "./Tiles";
 import { isMobile } from "../../common";
 import { ActiveList, ActiveRef } from "../../ActiveList";
 import type GUI from "../GUI";
-import ScoreBar from "../ScoreBar";
+import ScoreBar from "./ScoreBar";
 
 
 export default class Board extends Container{
@@ -48,7 +48,7 @@ export default class Board extends Container{
         this._bg = new BoardBackground(width, height);
         this._tileBg = new TileBackground(width, height, rows, cols);
         this._tiles = new Tiles(this, width, height, rows, cols);
-        this._scoreBar = new ScoreBar(width, height);
+        this._scoreBar = new ScoreBar(this, width, height);
         
         this.addChild(this._bg);
         this.addChild(this._tileBg);
@@ -70,6 +70,10 @@ export default class Board extends Container{
 
     public makeMove(moves: number[]): void {
         this._tiles.makeMove(moves);
+    }
+
+    public updateScore(score: number): void {
+        this._scoreBar.updateScore(score);
     }
 
     public resize(newParentWidth: number, newParentHeight: number): void {

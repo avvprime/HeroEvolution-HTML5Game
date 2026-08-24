@@ -14,6 +14,8 @@ export const Event = {
     BOARD_MOVE: 9,
     BOARD_ADD_TILE: 10,
 
+    SCORE_UPDATE: 11,
+
     GENERATE_TEX_REQ: 15,
     GENERATE_TEX_RES: 16,
 

@@ -39,8 +39,8 @@ export default class GameManager {
         const dir = this.gatherInput();
         if (dir !== -1) {
             this._game.makeBoardMove(dir);
-            
             this._game.damageEnemy();
+            this._game.calcScore();
         }
 
     }

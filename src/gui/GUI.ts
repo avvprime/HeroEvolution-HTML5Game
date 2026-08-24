@@ -1,12 +1,10 @@
-import { Container, Sprite, Texture } from "pixi.js";
+import { Container } from "pixi.js";
 import ScaleManager from "../managers/ScaleManager";
 import Board from "./board/Board";
 import TopProgress from "./top_progress/TopProgress";
 import { ActiveList, ActiveRef } from "../ActiveList";
 import type Game from "../Game";
 import { Event, Events } from "../managers/EventManager";
-import ScoreBar from "./ScoreBar";
-
 
 const Scale = ScaleManager.instance;
 
@@ -43,6 +41,7 @@ export default class GUI extends Container{
 
         this._boundEventListeners[Event.BOARD_MOVE] = this.onBoardMove.bind(this);
         this._boundEventListeners[Event.BOARD_ADD_TILE] = this.onBoardAddTile.bind(this);
+        this._boundEventListeners[Event.SCORE_UPDATE] = this.onScoreChange.bind(this);
 
         this.addEventListeners();
 
@@ -86,6 +85,10 @@ export default class GUI extends Container{
 
     private onBoardMove(_dir: number, moves: number[]): void {
         this._board.makeMove(moves);
+    }
+
+    private onScoreChange(score: number): void {
+        this._board.updateScore(score);
     }
 
     private onResize(newScreenWidth: number, newScreenHeight: number): void {
