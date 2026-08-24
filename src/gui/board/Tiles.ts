@@ -51,6 +51,8 @@ export default class Tiles extends Container {
         this._activeList = new ActiveList();
         this._activeRef = new ActiveRef(this.update.bind(this));
         this._parent.activeList.add(this._activeRef);
+
+        this.sortableChildren = true;
     }
 
     public get activeList(): ActiveList { return this._activeList }
