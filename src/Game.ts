@@ -66,6 +66,7 @@ export default class Game {
         const enemy = new Enemy(this, 100, 'enemy');
         enemy.events.on('Died', () => { /* enemy.events.off('Died', this)  */ } );
         if (isMobile) {
+            enemy.x = 200;
             enemy.y = 160;
         } else {
             enemy.x = 600;

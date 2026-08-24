@@ -17,7 +17,7 @@ export default class GUI extends Container{
 
     private _board: Board;
     private _topProgress: TopProgress;
-    
+
     private _parent: Game;
 
     private _boundEventListeners: Record<Event, ((...args: any[]) => void)> = {}
@@ -36,7 +36,7 @@ export default class GUI extends Container{
         const clientSize = Scale.clientSize;
 
         this._topProgress = new TopProgress(clientSize.width, clientSize.height);
-        this.addChild(this._topProgress);
+        //this.addChild(this._topProgress);
 
         this._board = new Board(this, clientSize.width, clientSize.height, 3, 3);
         this.addChild(this._board);

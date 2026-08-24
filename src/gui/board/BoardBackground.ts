@@ -44,7 +44,6 @@ export default class BoardBackground extends Container {
 
         const cornerTop = new Sprite(Assets.get('boardBgCornerTop'));
         cornerTop.x = width;
-        cornerTop.y = height * 0.1;
 
         const cornerBottom = new Sprite(Assets.get('boardBgCornerBottom'));
         cornerBottom.x = width;
@@ -79,14 +78,13 @@ export default class BoardBackground extends Container {
         }
 
         this._cornerTop.x = width;
-        this._cornerTop.y = height * 0.1;
 
         this._cornerBottom.x = width;
         this._cornerBottom.y = height - this._cornerBottom.height;
 
         this._bgShadow.x = width;
-        this._bgShadow.y = height * 0.1 + this._cornerTop.height;
-        this._bgShadow.height = height - ((height * 0.1) + this._cornerTop.height + this._cornerBottom.height);
+        this._bgShadow.y = this._cornerTop.height;
+        this._bgShadow.height = height - (this._cornerTop.height + this._cornerBottom.height);
 
         const bricksTop = this._brickGroup[0];
 
