@@ -15,8 +15,16 @@ export default class Tile extends Container {
     }
 
     private _mergeScaleUpAnim: any = {
-        from: 0,
+        from: 0.5,
         to: 1,
+        duration: 300,
+        elapsedTime: 0,
+        playing: false
+    }
+
+    private _mergeScaleDownAnim: any = {
+        from: 1,
+        to: 0,
         duration: 200,
         elapsedTime: 0,
         playing: false
@@ -27,6 +35,9 @@ export default class Tile extends Container {
     private _boardIdx: number = -1;
     private _parent: Tiles;
     private _activeRef: ActiveRef;
+
+    private _otherTileTriggered: boolean = false;
+    private _mergeTriggered: boolean = false;
 
     private _totalActiveAnims: number = 0;
 
@@ -59,6 +70,11 @@ export default class Tile extends Container {
             }
         }
 
+        this._otherTileTriggered = false;
+        this._mergeTriggered = false;
+        if (val > 0) this.zIndex = 1;
+        
+
         this._targetVal = val;
         this._boardIdx = boardIdx;
 
@@ -79,8 +95,9 @@ export default class Tile extends Container {
     }
 
     public disappear(): void {
-        if (this._activeRef.currentlyActive) this._parent.activeList.remove(this._activeRef);
-        this.visible = false;
+        this._mergeScaleDownAnim.elapsedTime = 0;
+        this._mergeScaleDownAnim.playing = true;
+        this.onAnimAdded();
     }
 
     public resize(x: number, y: number, tileSize: number): void {
@@ -93,7 +110,8 @@ export default class Tile extends Container {
     private setValue(val: number) {
         this._value = val;
         this._body.texture = Assets.get('hero' + this._value);
-        
+        this.zIndex = 0;
+
         this._mergeScaleUpAnim.elapsedTime = 0;
         this._mergeScaleUpAnim.playing = true;
         this.onAnimAdded();
@@ -104,10 +122,24 @@ export default class Tile extends Container {
             const a = this._moveAnim;
             a.elapsedTime += deltaMS;
             const t = Math.min(1, a.elapsedTime / a.duration);
-            const easedT = easeOutBack(t);
+            const easedT = easeOutBack(t, 1.1);
             const x = lerp(a.from.x, a.to.x, easedT);
             const y = lerp(a.from.y, a.to.y, easedT);
             this.position.set(x, y);
+
+
+            if (this._targetVal > 0) {
+                if (t > 0.3 && !this._otherTileTriggered) {
+                    this._parent.onMergeTileMoved(this._boardIdx);
+                    this._otherTileTriggered = true;
+                }
+
+                if (t > 0.6 && !this._mergeTriggered) {
+                    this.setValue(this._targetVal);
+                    this._mergeTriggered = true;
+                }
+            }
+
             if (t >= 1) {
                 a.elapsedTime = 0;
                 a.playing = false;
@@ -120,11 +152,24 @@ export default class Tile extends Container {
             const a = this._mergeScaleUpAnim;
             a.elapsedTime += deltaMS;
             const t = Math.min(1, a.elapsedTime / a.duration);
-            this._body.scale.set(lerp(a.from, a.to, easeOutBack(t)));
+            this._body.scale.set(lerp(a.from, a.to, easeOutBack(t, 3)));
             if (t >= 1) {
                 a.elapsedTime = 0;
                 a.playing = false;
                 this.onAnimFinished();
+            }
+        }
+
+        if (this._mergeScaleDownAnim.playing) {
+            const a = this._mergeScaleDownAnim;
+            a.elapsedTime += deltaMS;
+            const t = Math.min(1, a.elapsedTime / a.duration);
+            this._body.scale.set(lerp(a.from, a.to, t));
+            if (t >= 1) {
+                a.elapsedTime = 0;
+                a.playing = false;
+                this.onAnimFinished();
+                this.onDisappeared();
             }
         }
     }
@@ -140,9 +185,11 @@ export default class Tile extends Container {
     }
 
     private onMoved(): void {
-        if (this._targetVal > 0) {
-            this._parent.onMergeTileMoved(this._boardIdx);
-            this.setValue(this._targetVal);
-        }
+        //
+    }
+
+    private onDisappeared(): void {
+        this.visible = false;
+
     }
 }
