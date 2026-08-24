@@ -3,7 +3,6 @@ import BoardBackground from "./BoardBackground";
 import TileBackground from "./TileBackground";
 import Tiles from "./Tiles";
 import { isMobile } from "../../common";
-import { Event, Events } from "../../managers/EventManager";
 import { ActiveList, ActiveRef } from "../../ActiveList";
 import type GUI from "../GUI";
 import ScoreBar from "../ScoreBar";
@@ -96,8 +95,7 @@ export default class Board extends Container{
             this._tiles.position.set(this._tileBg.x, this._tileBg.y);
             this._scoreBar.x = width / 2 - this._scoreBar.width / 2;
         }
-        console.log(this._tileBg.height);
-        console.log(this._bg.height);
+        
     }
 
     public free(): void {
