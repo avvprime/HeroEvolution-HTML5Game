@@ -16,6 +16,10 @@ export const Event = {
 
     SCORE_UPDATE: 11,
 
+    ENEMY_DIED: 12,
+
+    GUI_TILE_MERGED: 13,
+
     GENERATE_TEX_REQ: 15,
     GENERATE_TEX_RES: 16,
 

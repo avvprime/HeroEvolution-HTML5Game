@@ -2,7 +2,7 @@ import { Assets, Container, Sprite } from "pixi.js";
 import type Tiles from "./Tiles";
 import { ActiveRef } from "../../ActiveList";
 import { easeOutBack, lerp } from "../../util";
-
+import { Events, Event} from "../../managers/EventManager";
 
 export default class Tile extends Container {
 
@@ -60,7 +60,14 @@ export default class Tile extends Container {
     }
 
     public get value(): number { return this._value }
-    
+
+    public prepare(x: number, y: number, value: number): void {
+        this.position.set(x, y);
+        this.setValue(value);
+        this.visible = true;
+        console.log("pool tile")
+    }
+
     public move(x: number, y: number, val: number, boardIdx: number): void {
 
         if (this._moveAnim.playing) {
@@ -73,7 +80,7 @@ export default class Tile extends Container {
         this._otherTileTriggered = false;
         this._mergeTriggered = false;
         if (val > 0) this.zIndex = 1;
-        
+
 
         this._targetVal = val;
         this._boardIdx = boardIdx;
@@ -82,7 +89,7 @@ export default class Tile extends Container {
         const dy = y - this.y;
         const dist = Math.hypot(dx, dy);
         const speed = 1;
-        
+
         this._moveAnim.duration = dist / speed;
         this._moveAnim.from.x = this.x;
         this._moveAnim.from.y = this.y;
@@ -137,6 +144,7 @@ export default class Tile extends Container {
                 if (t > 0.6 && !this._mergeTriggered) {
                     this.setValue(this._targetVal);
                     this._mergeTriggered = true;
+                    Events.emit(Event.GUI_TILE_MERGED, this.x, this.y);
                 }
             }
 
@@ -147,7 +155,7 @@ export default class Tile extends Container {
                 this.onMoved();
             }
         }
-        
+
         if (this._mergeScaleUpAnim.playing) {
             const a = this._mergeScaleUpAnim;
             a.elapsedTime += deltaMS;
@@ -185,7 +193,7 @@ export default class Tile extends Container {
     }
 
     private onMoved(): void {
-        //
+        
     }
 
     private onDisappeared(): void {

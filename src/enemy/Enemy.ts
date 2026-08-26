@@ -3,6 +3,7 @@ import { ActiveList, ActiveRef } from "../ActiveList";
 import LocalEvents from "../LocalEvents";
 import HealthBar from "./HealthBar";
 import type Game from "../Game";
+import { Event, Events } from "../managers/EventManager";
 
 
 export default class Enemy extends Container{
@@ -24,7 +25,7 @@ export default class Enemy extends Container{
         this._parent = parent;
 
         this._health = health;
-        this._events = new LocalEvents(['HealthChanged', 'Died']);
+        this._events = new LocalEvents(['HealthChanged']);
         this._activeList = new ActiveList();
 
         this._activeRef = new ActiveRef(this.update.bind(this));
@@ -60,7 +61,7 @@ export default class Enemy extends Container{
             }, 500);
         }
         
-        console.log("Enemy: Health is ", this._health);
+        console.log("Enemy: HP ", this._health);
         this._events.emit('HealthChanged', this._health);
     }
 
@@ -76,6 +77,6 @@ export default class Enemy extends Container{
     }
 
     private onDeath(): void {
-        this._events.emit('Died');
+        Events.emit(Event.ENEMY_DIED);
     }
 }

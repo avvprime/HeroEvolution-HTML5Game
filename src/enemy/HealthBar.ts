@@ -80,8 +80,6 @@ export default class HealthBar extends Container {
     }
 
     private updateValue(value: number): void {
-        console.log("HealthBar: updateValue");
-
         this._valueChangeAnim.from = this._value;
         this._valueChangeAnim.to = value;
         this._valueChangeAnim.elapsedTime = 0;
@@ -91,7 +89,6 @@ export default class HealthBar extends Container {
     }
 
     private onChangeAnimCompleted(): void {
-        console.log("HealthBar: animCompleted")
         this._parent.activeList.remove(this._activeRef);
     }
 }

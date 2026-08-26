@@ -6,6 +6,7 @@ import { isMobile } from "../../common";
 import { ActiveList, ActiveRef } from "../../ActiveList";
 import type GUI from "../GUI";
 import ScoreBar from "./ScoreBar";
+import VFXLayer from "./VFXLayer";
 
 
 export default class Board extends Container{
@@ -17,7 +18,7 @@ export default class Board extends Container{
     private _tileBg: TileBackground;
     private _tiles: Tiles;
     private _scoreBar: ScoreBar;
-
+    private _vfxLayer: VFXLayer;
 
     private _activeList: ActiveList;
     private _activeRef: ActiveRef;
@@ -49,11 +50,13 @@ export default class Board extends Container{
         this._tileBg = new TileBackground(width, height, rows, cols);
         this._tiles = new Tiles(this, width, height, rows, cols);
         this._scoreBar = new ScoreBar(this, width, height);
+        this._vfxLayer = new VFXLayer();
         
         this.addChild(this._bg);
         this.addChild(this._tileBg);
         this.addChild(this._tiles);
         this.addChild(this._scoreBar);
+        this.addChild(this._vfxLayer);
 
         /*
         setTimeout(() => {

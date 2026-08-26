@@ -1,4 +1,4 @@
-import { Application, Assets, BitmapFont, Container, Sprite, type ContainerChild, type Renderer } from "pixi.js";
+import { Application, Assets, BitmapFont, Container, Sprite, Ticker, type ContainerChild, type Renderer } from "pixi.js";
 import GameManager from "./GameManager";
 import { Event, Events } from "./managers/EventManager";
 import { isMobile } from "./common";
@@ -55,16 +55,15 @@ export default class Game {
         this._initialized = true;
 
         callback(this._app.canvas);
-        
-        Loop.registerUpdateCallback(this.update.bind(this));
-        Loop.start();
 
+        this._app.ticker.add(this.update.bind(this));
     }
 
     public get activeList(): ActiveList { return this._activeList }
 
     public addGround(): void {
         const ground = new Sprite(Assets.get('ground'));
+        ground.scale.y = 1.1;
         if (isMobile) {
             ground.y = 400;
         }
@@ -77,7 +76,6 @@ export default class Game {
 
     public addEnemy(): void {
         const enemy = new Enemy(this, 100, 'enemy');
-        enemy.events.on('Died', () => { /* enemy.events.off('Died', this)  */ } );
         if (isMobile) {
             enemy.x = 200;
             enemy.y = 160;
@@ -117,12 +115,8 @@ export default class Game {
         Events.emit(Event.SCORE_UPDATE, this._score);
     }
 
-    public calcScore(): void {
-        
-    }
-
     public damageEnemy(): void {
-        //this._enemy.takeDamage(10);
+        this._enemy.takeDamage(this._score);
     }
 
     private loadAssets(): void {
@@ -151,6 +145,8 @@ export default class Game {
 
             { alias: 'blade', src: 'blade.png' },
 
+            { alias: 'circle', src: 'circle-16.png' },
+
         ]).then(() => { this.onAssetsLoaded() });
     }
 
@@ -167,7 +163,7 @@ export default class Game {
         this._gui = new GUI(this);
         this._app.stage.addChild(this._world, this._gui);
 
-         ScaleManager.instance.register(this._app.canvas, this._app.renderer);
+        ScaleManager.instance.register(this._app.canvas, this._app.renderer);
         ScaleManager.instance.connect(this.onResize.bind(this));
         ScaleManager.instance.setScaleMode('cover');
         isMobile ? ScaleManager.instance.setBaseSize(615, 1128) : ScaleManager.instance.setBaseSize(1128, 615);
@@ -175,7 +171,8 @@ export default class Game {
         this._manager = new GameManager(this);
     }
 
-    private update(deltaMS: number): void {
+    private update(ticker: Ticker): void {
+        const deltaMS = ticker.deltaMS;
         this._activeList.update(deltaMS);
         Input.loopClear();
     }

@@ -93,10 +93,18 @@ export default class Tiles extends Container {
         const col = idx % this._cols;
         const x = col * this._stepSize + this._tilePadding;
         const y = row * this._stepSize + this._tilePadding;
-        const tile = new Tile(this, x, y, this._tileSize, val);
 
-        this.addChild(tile);
-        this._tiles.push(tile);
+        let tile;
+        if (this._tilePool.length > 0) {
+            tile = this._tilePool.pop()!;
+            tile.prepare(x, y, val);
+        }
+        else {
+            tile = new Tile(this, x, y, this._tileSize, val);
+            this.addChild(tile);
+            this._tiles.push(tile);
+        }
+
         this._visualBoard[idx] = tile;
     }
 
@@ -143,7 +151,7 @@ export default class Tiles extends Container {
     }
 
     public free(): void {
-        
+        this._parent.activeList.remove(this._activeRef);
     }
 
     private update(deltaMS: number): void {

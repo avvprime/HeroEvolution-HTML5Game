@@ -15,6 +15,11 @@ export default class GameManager {
     private _game: Game;
     private _activeRef: ActiveRef;
 
+    private _hitWaitTime: number = 1000;
+    private _currentHitTime: number = 0;
+
+    private _boundEventListeners: Record<Event, ((...args: any[]) => void)> = {}
+
     constructor(game: Game) {
         this._game = game;
         
@@ -33,16 +38,42 @@ export default class GameManager {
         this._game.addBoardTile(2, 1)
         this._game.addBoardTile(3, 1);
         this._game.logBoardModel();
+
+        this.addEventListeners();
     }
 
-    private update(): void {
+    public free(): void {
+        this.removeEventListeners();
+    }
+
+    private addEventListeners(): void {
+        this._boundEventListeners[Event.ENEMY_DIED] = this.onEnemyDied.bind(this);
+
+        for (const key of Object.keys(this._boundEventListeners)) {
+            const parsedKey = parseInt(key);
+            Events.on(parsedKey, this._boundEventListeners[parsedKey])
+        }
+    }
+
+    private removeEventListeners(): void {
+        for (const key of Object.keys(this._boundEventListeners)) {
+            const parsedKey = parseInt(key);
+            Events.off(parsedKey, this._boundEventListeners[parsedKey])
+        }
+    }
+
+    private update(deltaMS: number): void {
         const dir = this.gatherInput();
         if (dir !== -1) {
             this._game.makeBoardMove(dir);
             this._game.damageEnemy();
-            this._game.calcScore();
         }
 
+        this._currentHitTime += deltaMS;
+        if (this._currentHitTime >= this._hitWaitTime) {
+            this._currentHitTime = 0;
+            this._game.damageEnemy();
+        }
     }
 
     private gatherInput(): number {
@@ -75,7 +106,9 @@ export default class GameManager {
         return dir;
     }
 
-    
+    private onEnemyDied(): void {
+
+    }
 
 
 }

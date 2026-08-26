@@ -6,6 +6,7 @@ import { ActiveList, ActiveRef } from "../ActiveList";
 import type Game from "../Game";
 import { Event, Events } from "../managers/EventManager";
 
+
 const Scale = ScaleManager.instance;
 
 export default class GUI extends Container{
@@ -19,6 +20,8 @@ export default class GUI extends Container{
     private _parent: Game;
 
     private _boundEventListeners: Record<Event, ((...args: any[]) => void)> = {}
+
+    //private _particles: ParticleContainer;
 
     constructor(parent: Game) {
         super();
@@ -73,6 +76,7 @@ export default class GUI extends Container{
             const parsedKey = parseInt(key);
             Events.off(parsedKey, this._boundEventListeners[parsedKey])
         }
+        this._boundEventListeners = {};
     }
 
     private update(deltaMS: number): void {

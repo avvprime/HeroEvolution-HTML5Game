@@ -13,6 +13,7 @@
     "vite": "^8.2.0"
   },
   "dependencies": {
+    "pixi-particle-system": "^1.2.0",
     "pixi.js": "^8.19.0"
   }
 }

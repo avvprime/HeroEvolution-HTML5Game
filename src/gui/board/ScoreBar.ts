@@ -2,7 +2,7 @@ import { Assets, BitmapText, Container, Sprite, Text } from "pixi.js";
 import { isMobile } from "../../common";
 import { ActiveRef } from "../../ActiveList";
 import type Board from "./Board";
-import { lerp } from "../../util";
+import { easeOutSine, lerp } from "../../util";
 
 export default class ScoreBar extends Container {
     
@@ -23,6 +23,24 @@ export default class ScoreBar extends Container {
         playing: false
     }
 
+    private _scoreScaleUpAnim: any = {
+        from: 1, 
+        to: 1.3,
+        duration: 200,
+        elapsedTime: 0,
+        playing: false
+    }
+
+    private _scoreScaleDownAnim: any = {
+        from: 1.3,
+        to: 1,
+        duration: 100,
+        elapsedTime: 0,
+        playing: false
+    }
+
+    private _totalAnimsPlaying: number = 0;
+
     private _value: number = 0;
 
     constructor(parent: Board, parentWidth: number, parentHeight: number) {
@@ -37,7 +55,7 @@ export default class ScoreBar extends Container {
             text: '999',
             style: {
                 fontFamily: 'SlackeyBitmap',
-                fontSize: 32,
+                fontSize: 28,
                 fill: 0x000000,
                 align: 'center'
             },
@@ -66,7 +84,24 @@ export default class ScoreBar extends Container {
         this._scoreChangeAnim.elapsedTime = 0;
         this._scoreChangeAnim.playing = true;
 
-        this._parent.activeList.add(this._activeRef);
+        this.onAnimAdded();
+
+        if (this._scoreScaleUpAnim.playing) {
+            this._scoreScaleUpAnim.elapsedTime = 0;
+            return;
+        }
+
+        this._scoreScaleUpAnim.from = 1;
+        this._scoreScaleUpAnim.elapsedTime = 0;
+        this._scoreScaleUpAnim.playing = true;
+
+        if (this._scoreScaleDownAnim.playing) {
+            this._scoreScaleDownAnim.elapsedTime = 0;
+            this._scoreScaleDownAnim.playing = false;
+            this._scoreScaleUpAnim.from = this._label.scale.x;
+        }
+
+        this.onAnimAdded();
     }
 
     public resize(newParentWidth: number, newParentHeight: number): void {
@@ -84,7 +119,33 @@ export default class ScoreBar extends Container {
             if (t >= 1) {
                 a.elapsedTime = 0;
                 a.playing = false;
-                this._parent.activeList.remove(this._activeRef);
+                this.onAnimEnded();
+            }
+        }
+
+        if (this._scoreScaleUpAnim.playing) {
+            const a = this._scoreScaleUpAnim;
+            a.elapsedTime += deltaMS;
+            const t = Math.min(1, a.elapsedTime / a.duration);
+            this._label.scale.set(lerp(a.from, a.to, easeOutSine(t)));
+            if (t >= 1) {
+                a.elapsedTime = 0;
+                a.playing = false;
+                
+                this._scoreScaleDownAnim.elapsedTime = 0;
+                this._scoreScaleDownAnim.playing = true;
+            }
+        }
+
+        if (this._scoreScaleDownAnim.playing) {
+            const a = this._scoreScaleDownAnim;
+            a.elapsedTime += deltaMS;
+            const t = Math.min(1, a.elapsedTime / a.duration);
+            this._label.scale.set(lerp(a.from, a.to, easeOutSine(t)));
+            if (t >= 1) {
+                a.elapsedTime = 0;
+                a.playing = false;
+                this.onAnimEnded();
             }
         }
     }
@@ -103,6 +164,17 @@ export default class ScoreBar extends Container {
             this.x = width / 2 - this._bg.width / 2;
             this.y = height * 0.05;
         }
-        
+        this._label.x = this._bg.width / 2 + 16;
+        this._label.y = this._bg.height / 2 - 3;
+    }
+
+    private onAnimAdded(): void {
+        if (this._totalAnimsPlaying === 0) this._parent.activeList.add(this._activeRef);
+        this._totalAnimsPlaying++;
+    }
+    
+    private onAnimEnded(): void {
+        this._totalAnimsPlaying--;
+        if (this._totalAnimsPlaying === 0) this._parent.activeList.remove(this._activeRef);
     }
 }
