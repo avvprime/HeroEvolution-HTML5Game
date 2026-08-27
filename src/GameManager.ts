@@ -37,6 +37,11 @@ export default class GameManager {
         this._game.addBoardTile(1, 1);
         this._game.addBoardTile(2, 1)
         this._game.addBoardTile(3, 1);
+        this._game.addBoardTile(4, 1);
+        this._game.addBoardTile(5, 1);
+        this._game.addBoardTile(6, 2);
+        this._game.addBoardTile(7, 3);
+        this._game.addBoardTile(8, 3);
         this._game.logBoardModel();
 
         this.addEventListeners();

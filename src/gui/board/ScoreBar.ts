@@ -1,4 +1,4 @@
-import { Assets, BitmapText, Container, Sprite, Text } from "pixi.js";
+import { Assets, BitmapText, Container, Sprite } from "pixi.js";
 import { isMobile } from "../../common";
 import { ActiveRef } from "../../ActiveList";
 import type Board from "./Board";

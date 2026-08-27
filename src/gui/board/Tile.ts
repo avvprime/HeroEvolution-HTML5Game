@@ -1,8 +1,10 @@
-import { Assets, Container, Sprite } from "pixi.js";
+import { Assets, Container, Filter, GlProgram, Sprite } from "pixi.js";
 import type Tiles from "./Tiles";
 import { ActiveRef } from "../../ActiveList";
 import { easeOutBack, lerp } from "../../util";
 import { Events, Event} from "../../managers/EventManager";
+import { highlight } from "../../shaders/fragment";
+import vertex from "../../shaders/vertex";
 
 export default class Tile extends Container {
 
@@ -30,6 +32,14 @@ export default class Tile extends Container {
         playing: false
     }
 
+    private _highlightAnim: any = {
+        from: 0,
+        to: 1,
+        duration: 500,
+        elapsedTime: 0,
+        playing: false
+    }
+
     private _value: number = 0;
     private _targetVal: number = 0;
     private _boardIdx: number = -1;
@@ -42,6 +52,7 @@ export default class Tile extends Container {
     private _totalActiveAnims: number = 0;
 
     private _body: Sprite;
+    private _highlightFilter: Filter;
 
     constructor(parent: Tiles, x: number, y: number, size: number, value: number) {
         super();
@@ -57,6 +68,29 @@ export default class Tile extends Container {
         this.width = size;
         this.height = size;
         this.setValue(value);
+
+        this._highlightFilter = new Filter({
+            glProgram: new GlProgram({
+                vertex,
+                fragment: highlight
+            }),
+            resources: {
+                highlighUniforms: {
+                    uProgress: { value: 0, type: 'f32' },
+                    uLineSmoothness: { value: 0.045, type: 'f32' },
+                    uLineWidth: { value: 0.09, type: 'f32' },
+                    uBrightness: { value: 3.0, type: 'f32' },
+                    uRotationDeg: { value: 30, type: 'f32' },
+                    uDistortion: { value: 1.8, type: 'f32' },
+                    uPosition: { value: 0, type: 'f32' },
+                    uPositionMin: { value: -0.3, type: 'f32' },
+                    uPositionMax: { value: 1.3, type: 'f32' },
+                    uAlpha: { value: 1.0, type: 'f32' },
+                }
+            }
+        });
+        this._body.filters = [this._highlightFilter];
+
     }
 
     public get value(): number { return this._value }
@@ -97,7 +131,6 @@ export default class Tile extends Container {
         this._moveAnim.to.y = y;
         this._moveAnim.elapsedTime = 0;
         this._moveAnim.playing = true;
-
         this.onAnimAdded();
     }
 
@@ -139,12 +172,15 @@ export default class Tile extends Container {
                 if (t > 0.3 && !this._otherTileTriggered) {
                     this._parent.onMergeTileMoved(this._boardIdx);
                     this._otherTileTriggered = true;
+                    Events.emit(Event.GUI_TILE_MERGED, this.x - this._body.width / 2, this.y - this._body.height / 2, this._targetVal);
                 }
 
                 if (t > 0.6 && !this._mergeTriggered) {
                     this.setValue(this._targetVal);
                     this._mergeTriggered = true;
-                    Events.emit(Event.GUI_TILE_MERGED, this.x, this.y);
+                    this._highlightAnim.playing = true;
+                    this._highlightAnim.elapsedTime = 0;
+                    this.onAnimAdded();
                 }
             }
 
@@ -178,6 +214,18 @@ export default class Tile extends Container {
                 a.playing = false;
                 this.onAnimFinished();
                 this.onDisappeared();
+            }
+        }
+
+        if (this._highlightAnim.playing) {
+            const a = this._highlightAnim;
+            a.elapsedTime += deltaMS;
+            const t = Math.min(1, a.elapsedTime / a.duration);
+            this._highlightFilter.resources.highlighUniforms.uniforms.uProgress = lerp(a.from, a.to, t);
+            if (t >= 1) {
+                a.elapsedTime = 0;
+                a.playing = false;
+                this.onAnimFinished();
             }
         }
     }

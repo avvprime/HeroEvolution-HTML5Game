@@ -1,4 +1,4 @@
-import { Application, Assets, BitmapFont, Container, Sprite, Ticker, type ContainerChild, type Renderer } from "pixi.js";
+import { Application, Assets, BitmapFont, Container, Sprite, Ticker } from "pixi.js";
 import GameManager from "./GameManager";
 import { Event, Events } from "./managers/EventManager";
 import { isMobile } from "./common";
@@ -6,7 +6,6 @@ import GUI from "./gui/GUI";
 import Enemy from "./enemy/Enemy";
 import BoardModel from "./board/BoardModel";
 import ScaleManager from "./managers/ScaleManager";
-import Loop from "./managers/LoopManager";
 import Input from "./managers/InputManager";
 import { ActiveList } from "./ActiveList";
 
@@ -19,7 +18,8 @@ export default class Game {
     private _boardModel!: BoardModel;
     private _enemy!: Enemy; 
     
-    private _manager!: GameManager;
+    // will be private - temp changed for dev purp
+    public _manager!: GameManager;
 
     private _activeList: ActiveList;
 

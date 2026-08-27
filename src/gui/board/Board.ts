@@ -50,7 +50,7 @@ export default class Board extends Container{
         this._tileBg = new TileBackground(width, height, rows, cols);
         this._tiles = new Tiles(this, width, height, rows, cols);
         this._scoreBar = new ScoreBar(this, width, height);
-        this._vfxLayer = new VFXLayer();
+        this._vfxLayer = new VFXLayer(width, height);
         
         this.addChild(this._bg);
         this.addChild(this._tileBg);
@@ -87,6 +87,7 @@ export default class Board extends Container{
         this._tileBg.resize(width, height);
         this._tiles.resize(width, height);
         this._scoreBar.resize(width, height);
+        this._vfxLayer.resize(width, height);
 
         // It is likely tablet
         if (this._tileBg.height > this._bg.height) {

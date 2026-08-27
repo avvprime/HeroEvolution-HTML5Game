@@ -1,7 +1,7 @@
 import { Assets, Container, ParticleContainer, Point, Texture } from "pixi.js";
 import { Event, Events } from "../../managers/EventManager";
 import { Emitter, type ColorBehaviorConfig, type MovementBehaviorConfig, type ScaleBehaviorConfig, type SpawnBehaviorConfig, type TextureBehaviorConfig } from "pixi-particle-system";
-import { HeroColor } from "../../common";
+
 
 type Particle = {
     container: ParticleContainer,
@@ -10,13 +10,22 @@ type Particle = {
 
 export default class VFXLayer extends Container {
 
+    private _relWidth: number = 0.4;
+
     private _boundEventListeners: Record<Event, ((...args: any[]) => void)> = {}
-    private _particles: Particle[] = [];
+    //private _particles: Particle[] = [];
     private _particlePool: Particle[] = [];
 
-    constructor() {
+    constructor(parentWidth: number, parentHeight: number) {
         super();
         this.addEventListeners();
+        this.resize(parentWidth, parentHeight);
+    }
+
+    public resize(newParentWidth: number, newParentHeight: number): void {
+        const size = newParentWidth * this._relWidth / 2;
+        this.x = newParentWidth / 2 - size;
+        this.y = newParentHeight / 2 - size;
     }
 
     public free(): void {
@@ -50,13 +59,14 @@ export default class VFXLayer extends Container {
         const emitter = new Emitter(container, {
             emitterVersion: "0",
             minParticleLifetime: 0.1,
-            maxParticleLifetime: 1,
-            maxParticles: 8,
-            particlesPerWave: 8,
+            maxParticleLifetime: 0.5,
+            maxParticles: 2,
+            particlesPerWave: 1,
             spawnChance: 1,
             spawnInterval: 0.01,
             ease: 'sine.inout',
         });
+        
         emitter.scaleBehavior.applyConfig({
             xListData: {
                 list: [
@@ -74,10 +84,11 @@ export default class VFXLayer extends Container {
             },
             mode: "random"
         } as ScaleBehaviorConfig);
-
+        
+        const speed = 50;
         emitter.movementBehavior.applyConfig({
-            minMoveSpeed: new Point(-100, -100),
-            maxMoveSpeed: new Point(100, 100),
+            minMoveSpeed: new Point(-speed, -speed),
+            maxMoveSpeed: new Point(speed, speed),
             space: 'global',
             /*
             xListData: {
@@ -92,7 +103,7 @@ export default class VFXLayer extends Container {
                     { time: 1.0, value: 100 }
                 ]
             },*/
-            mode: "acceleration"
+            mode: 'linear'
         } as MovementBehaviorConfig);
 
         emitter.textureBehavior.applyConfig({
@@ -101,7 +112,7 @@ export default class VFXLayer extends Container {
         } as TextureBehaviorConfig);
 
         emitter.colorBehavior.applyConfig({
-            value: "#ff00ff",
+            value: "#ffffff",
             mode: "static",
         } as ColorBehaviorConfig);
 
@@ -117,15 +128,18 @@ export default class VFXLayer extends Container {
         }
     }
 
-    private onTileMerge(x: number, y: number, value: number): void {
+    private onTileMerge(x: number, y: number, _value: number): void {
+        console.log(this._particlePool.length)
         const particle = this._particlePool.length > 0 ? this._particlePool.pop()! : this.setupNewParticleEmitter();
         particle.container.position.set(x, y);
-        //particle.emitter.colorBehavior.staticValue = HeroColor[value];
+        //particle.emitter.colorBehavior.applyConfig({ value: HeroColor[value], mode: 'static'} )
         particle.emitter.play();
         setTimeout(() => {
             particle.emitter.stop();
-            this._particlePool.push(particle);
-        }, 1000);
+            setTimeout(() => {
+                this._particlePool.push(particle);    
+            }, 2000);
+        }, 700);
     }
 
 }
