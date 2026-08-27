@@ -1,7 +1,7 @@
-import { Assets, Container, Filter, GlProgram, Sprite } from "pixi.js";
+import { Assets, BitmapText, Container, Filter, GlProgram, Sprite } from "pixi.js";
 import type Tiles from "./Tiles";
 import { ActiveRef } from "../../ActiveList";
-import { easeOutBack, lerp } from "../../util";
+import { easeOutBack, easeOutSine, lerp } from "../../util";
 import { Events, Event} from "../../managers/EventManager";
 import { highlight } from "../../shaders/fragment";
 import vertex from "../../shaders/vertex";
@@ -40,6 +40,14 @@ export default class Tile extends Container {
         playing: false
     }
 
+    private _levelLabelRiseAnim: any = {
+        from: 0,
+        to: 1,
+        duration: 200,
+        elapsedTime: 0,
+        playing: false
+    }
+
     private _value: number = 0;
     private _targetVal: number = 0;
     private _boardIdx: number = -1;
@@ -53,6 +61,7 @@ export default class Tile extends Container {
 
     private _body: Sprite;
     private _highlightFilter: Filter;
+    private _leveLabel: BitmapText;
 
     constructor(parent: Tiles, x: number, y: number, size: number, value: number) {
         super();
@@ -68,6 +77,19 @@ export default class Tile extends Container {
         this.width = size;
         this.height = size;
         this.setValue(value);
+
+        this._leveLabel = new BitmapText({
+            text: 'Level 1',
+            style: {
+                fontFamily: 'SlackeyBitmap',
+                fontSize: 16,
+                fill: 0x000000
+            },
+            anchor: { x: 0.5, y: 0.5 },
+            x: this._body.width / 2,
+            y: -20
+        });
+        this.addChild(this._leveLabel);
 
         this._highlightFilter = new Filter({
             glProgram: new GlProgram({
@@ -99,6 +121,7 @@ export default class Tile extends Container {
         this.position.set(x, y);
         this.setValue(value);
         this.visible = true;
+        this._leveLabel.visible = true;
         console.log("pool tile")
     }
 
@@ -138,6 +161,8 @@ export default class Tile extends Container {
         this._mergeScaleDownAnim.elapsedTime = 0;
         this._mergeScaleDownAnim.playing = true;
         this.onAnimAdded();
+
+        this._leveLabel.visible = false;
     }
 
     public resize(x: number, y: number, tileSize: number): void {
@@ -178,9 +203,16 @@ export default class Tile extends Container {
                 if (t > 0.6 && !this._mergeTriggered) {
                     this.setValue(this._targetVal);
                     this._mergeTriggered = true;
+                    
                     this._highlightAnim.playing = true;
                     this._highlightAnim.elapsedTime = 0;
                     this.onAnimAdded();
+
+                    this._levelLabelRiseAnim.elapsedTime = 0;
+                    this._levelLabelRiseAnim.playing = true;
+                    this.onAnimAdded();
+
+                    this._leveLabel.text = 'Level ' + this._targetVal;
                 }
             }
 
@@ -222,6 +254,20 @@ export default class Tile extends Container {
             a.elapsedTime += deltaMS;
             const t = Math.min(1, a.elapsedTime / a.duration);
             this._highlightFilter.resources.highlighUniforms.uniforms.uProgress = lerp(a.from, a.to, t);
+            if (t >= 1) {
+                a.elapsedTime = 0;
+                a.playing = false;
+                this.onAnimFinished();
+            }
+        }
+
+        if (this._levelLabelRiseAnim.playing) {
+            const a = this._levelLabelRiseAnim;
+            a.elapsedTime += deltaMS;
+            const t = Math.min(1, a.elapsedTime / a.duration);
+            this._leveLabel.y = lerp(10, -20, easeOutSine(t));
+            this._leveLabel.alpha = t;
+            this._leveLabel.scale.set(lerp(0.5, 1, easeOutBack(t)));
             if (t >= 1) {
                 a.elapsedTime = 0;
                 a.playing = false;
