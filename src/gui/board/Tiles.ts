@@ -143,7 +143,6 @@ export default class Tiles extends Container {
                 tile.resize(x, y, this._tileSize);
             }
         }
-        console.log(this._tileSize);
 
         const totalPoolTiles = this._tilePool.length;
         for (let i = 0; i < totalPoolTiles; i++) {

@@ -63,8 +63,13 @@ export default class Tile extends Container {
     private _highlightFilter: Filter;
     private _leveLabel: BitmapText;
 
+    private _baseTileSize: number = 32;
+    private _levelLabelScale: number = 1;
+
     constructor(parent: Tiles, x: number, y: number, size: number, value: number) {
         super();
+
+        this._baseTileSize = size;
 
         this._body = new Sprite(Assets.get('hero' + value));
         this._body.pivot.set(size / 2);
@@ -167,9 +172,20 @@ export default class Tile extends Container {
     }
 
     public resize(x: number, y: number, tileSize: number): void {
-        this.width = tileSize;
-        this.height = tileSize + this._leveLabel.height;
+        const scale = tileSize / this._baseTileSize;
+        this._body.scale.set(scale);
+        this._body.position.set(this.width / 2);
+
+        this._leveLabel.scale.set(scale);
+        this._leveLabel.x = this._body.width / 2;
+        this._levelLabelScale = this._leveLabel.scale.x;
+
         this.position.set(x, y);
+
+        this._mergeScaleUpAnim.from = scale * 0.5;
+        this._mergeScaleUpAnim.to = scale;
+
+        this._mergeScaleDownAnim.from = scale;
     }
 
     private setValue(val: number) {
@@ -267,7 +283,7 @@ export default class Tile extends Container {
             const t = Math.min(1, a.elapsedTime / a.duration);
             this._leveLabel.y = lerp(10, -20, easeOutSine(t));
             this._leveLabel.alpha = t;
-            this._leveLabel.scale.set(lerp(0.5, 1, easeOutBack(t)));
+            this._leveLabel.scale.set(lerp(this._levelLabelScale * 0.5, this._levelLabelScale, easeOutBack(t)));
             if (t >= 1) {
                 a.elapsedTime = 0;
                 a.playing = false;
