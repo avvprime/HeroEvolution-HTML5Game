@@ -32,7 +32,7 @@ export default class ScoreParticle extends BitmapText {
             style: {
                 fontFamily: 'Slackey',
                 fontSize: 50,
-                fill: 0xffffed
+                fill: 0xffffff
             },
             anchor: { x: 0.5, y: 0.5 }
         });

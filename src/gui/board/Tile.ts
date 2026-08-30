@@ -11,7 +11,7 @@ export default class Tile extends Container {
     private _moveAnim: any = {
         from: { x: 0, y: 0 },
         to: { x: 0, y: 0 },
-        duration: 0,
+        duration: 200,
         elapsedTime: 0,
         playing: false
     }
@@ -142,12 +142,13 @@ export default class Tile extends Container {
         this._targetVal = val;
         this._boardIdx = boardIdx;
 
+        /*
         const dx = x - this.x;
         const dy = y - this.y;
         const dist = Math.hypot(dx, dy);
         const speed = 1;
 
-        this._moveAnim.duration = dist / speed;
+        this._moveAnim.duration = dist / speed;*/
         this._moveAnim.from.x = this.x;
         this._moveAnim.from.y = this.y;
         this._moveAnim.to.x = x;

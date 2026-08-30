@@ -54,11 +54,11 @@ export default class ScoreBar extends Container {
         this.addChild(this._bg);
 
         this._label = new BitmapText({
-            text: '999',
+            text: '0',
             style: {
                 fontFamily: 'Slackey',
                 fontSize: 36,
-                fill: 0x3d3d3d,
+                fill: 0xdddddd,
                 align: 'center'
             },
             x: this._bg.width / 2,
@@ -152,10 +152,13 @@ export default class ScoreBar extends Container {
     private adjustSize(width: number, _height: number): void {
         this._bg.width = width * this._relWidth;
         this._bg.height = this._bg.width * this._heightToWidthRatio;
-        this._label.width = this._bg.width * 0.2;
+        
+        this._label.width = this._bg.width * 0.3;
         this._label.height = this._bg.height * 0.5;
 
         this._adjustedScale = Math.min(this._label.scale.x, this._label.scale.y);
+
+        this._label.scale.set(this._adjustedScale);
 
         this._scoreScaleUpAnim.from = this._adjustedScale;
         this._scoreScaleUpAnim.to = this._adjustedScale * 1.3;
