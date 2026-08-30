@@ -58,7 +58,7 @@ export default class ScoreBar extends Container {
             style: {
                 fontFamily: 'Slackey',
                 fontSize: 36,
-                fill: 0xdddddd,
+                fill: 0xffffff,
                 align: 'center'
             },
             x: this._bg.width / 2,

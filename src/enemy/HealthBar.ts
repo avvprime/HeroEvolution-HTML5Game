@@ -85,10 +85,10 @@ export default class HealthBar extends Container {
         this._valueChangeAnim.elapsedTime = 0;
         this._valueChangeAnim.playing = true;
         
-        this._parent.activeList.add(this._activeRef);
+        this._parent.addToActiveList(this._activeRef);
     }
 
     private onChangeAnimCompleted(): void {
-        this._parent.activeList.remove(this._activeRef);
+        this._parent.removeFromActiveList(this._activeRef);
     }
 }
