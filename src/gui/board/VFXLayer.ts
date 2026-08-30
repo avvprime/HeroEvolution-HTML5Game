@@ -1,8 +1,9 @@
 import { Assets, BitmapText, Container, ParticleContainer, Point, Texture } from "pixi.js";
 import { Event, Events } from "../../managers/EventManager";
 import { Emitter, type ColorBehaviorConfig, type MovementBehaviorConfig, type ScaleBehaviorConfig, type SpawnBehaviorConfig, type TextureBehaviorConfig } from "pixi-particle-system";
-import { ActiveRef } from "../../ActiveList";
+import { ActiveList, ActiveRef } from "../../ActiveList";
 import type Board from "./Board";
+import ScoreParticle from "./ScoreParticle";
 
 
 type Particle = {
@@ -16,17 +17,23 @@ export default class VFXLayer extends Container {
 
     private _boundEventListeners: Record<Event, ((...args: any[]) => void)> = {}
     private _particlePool: Particle[] = [];
-    private _scorePool: BitmapText[] = [];
+    private _scorePool: ScoreParticle[] = [];
 
+    private _activeList: ActiveList;
     private _activeRef: ActiveRef;
     private _parent: Board;
     constructor(parent: Board, parentWidth: number, parentHeight: number) {
         super();
         this._parent = parent;
+        this._activeList = new ActiveList();
         this._activeRef = new ActiveRef(this.update.bind(this));
         this.addEventListeners();
         this.resize(parentWidth, parentHeight);
+
+        this._parent.activeList.add(this._activeRef);
     }
+
+    public get activeList(): ActiveList { return this._activeList }
 
     public resize(newParentWidth: number, newParentHeight: number): void {
         const size = newParentWidth * this._relWidth / 2;
@@ -40,7 +47,7 @@ export default class VFXLayer extends Container {
     }
 
     private update(deltaMS: number): void {
-
+        if (!this._activeList.empty) this._activeList.update(deltaMS);
     }
 
     private addEventListeners(): void {
@@ -139,16 +146,10 @@ export default class VFXLayer extends Container {
         }
     }
 
-    private setupNewScoreLabel(): BitmapText {
-        const label = new BitmapText({
-            text: 'score',
-            style: {
-                fontFamily: 'SlackeyBitmap',
-                fontSize: 18,
-                fill: 0x212121
-            }
-        });
-        return label;
+    private setupNewScoreParticle(): ScoreParticle {
+        const particle = new ScoreParticle(this);
+        this.addChild(particle);
+        return particle;
     }
 
     private onTileMerge(x: number, y: number, value: number): void {
@@ -156,16 +157,19 @@ export default class VFXLayer extends Container {
         particle.container.position.set(x, y);
         //particle.emitter.colorBehavior.applyConfig({ value: HeroColor[value], mode: 'static'} )
         particle.emitter.play();
+        
+        
+        const scoreLabel = this._scorePool.length > 0 ? this._scorePool.pop()! : this.setupNewScoreParticle();
+        scoreLabel.play(value.toString(), x + 32, y - 32);
+
+
         setTimeout(() => {
             particle.emitter.stop();
             setTimeout(() => {
+                this._scorePool.push(scoreLabel);
                 this._particlePool.push(particle);    
             }, 2000);
         }, 700);
-
-        const label = this._scorePool.length > 0 ? this._scorePool.pop()! : this.setupNewScoreLabel();
-        label.text = value;
-
     }
 
 }

@@ -166,10 +166,9 @@ export default class Tile extends Container {
     }
 
     public resize(x: number, y: number, tileSize: number): void {
-        this.x = x;
-        this.y = y;
         this.width = tileSize;
-        this.height = tileSize;
+        this.height = tileSize + this._leveLabel.height;
+        this.position.set(x, y);
     }
 
     private setValue(val: number) {

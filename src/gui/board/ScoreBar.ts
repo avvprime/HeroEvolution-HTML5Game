@@ -54,9 +54,9 @@ export default class ScoreBar extends Container {
         this._label = new BitmapText({
             text: '999',
             style: {
-                fontFamily: 'SlackeyBitmap',
-                fontSize: 28,
-                fill: 0x000000,
+                fontFamily: 'Slackey',
+                fontSize: 36,
+                fill: 0x3d3d3d,
                 align: 'center'
             },
             x: this._bg.width / 2,
@@ -80,7 +80,7 @@ export default class ScoreBar extends Container {
             return;
         }
         this._scoreChangeAnim.from = this._value;
-        this._scoreChangeAnim.to = score;
+        this._scoreChangeAnim.to = score * 1000;
         this._scoreChangeAnim.elapsedTime = 0;
         this._scoreChangeAnim.playing = true;
 
@@ -165,7 +165,7 @@ export default class ScoreBar extends Container {
             this.y = height * 0.05;
         }
         this._label.x = this._bg.width / 2 + 16;
-        this._label.y = this._bg.height / 2 - 3;
+        this._label.y = this._bg.height / 2 - 6;
     }
 
     private onAnimAdded(): void {

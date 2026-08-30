@@ -82,7 +82,8 @@ export default class Tiles extends Container {
     }
 
     public onMergeTileMoved(tileToDisappearBoardIdx: number): void {
-        const tile = this._tilesToDisappear.get(tileToDisappearBoardIdx)!;
+        const tile = this._tilesToDisappear.get(tileToDisappearBoardIdx);
+        if (tile === undefined) return;
         tile.disappear();
         this._tilePool.push(tile);
         this._tilesToDisappear.delete(tileToDisappearBoardIdx);
@@ -142,6 +143,7 @@ export default class Tiles extends Container {
                 tile.resize(x, y, this._tileSize);
             }
         }
+        console.log(this._tileSize);
 
         const totalPoolTiles = this._tilePool.length;
         for (let i = 0; i < totalPoolTiles; i++) {

@@ -9,25 +9,31 @@ import SwipeHandler from "./SwipeHandler";
 
 export default class GameManager {
 
-    
+
     private _swipeHandler: SwipeHandler;
 
     private _game: Game;
     private _activeRef: ActiveRef;
+
+    private _moveQueue: number[] = [];
+    private _moveThreshold: number = 100;
+    private _moveTime: number = 0;
 
     private _hitWaitTime: number = 1000;
     private _currentHitTime: number = 0;
 
     private _boundEventListeners: Record<Event, ((...args: any[]) => void)> = {}
 
+    private _enabled: boolean = true;
+
     constructor(game: Game) {
         this._game = game;
-        
+
         this._swipeHandler = new SwipeHandler();
-        
+
         this._activeRef = new ActiveRef(this.update.bind(this));
         this._game.activeList.add(this._activeRef);
-        
+
         this._game.addBoardModel();
         this._game.addEnemy();
         this._game.addGround();
@@ -68,10 +74,31 @@ export default class GameManager {
     }
 
     private update(deltaMS: number): void {
+        if (!this._enabled) return;
+
+        this._moveTime += deltaMS;
         const dir = this.gatherInput();
+
+        if (this._moveQueue.length > 0) {
+            if (this._moveTime > this._moveThreshold) {
+                const dir = this._moveQueue.pop()!;
+                this._game.makeBoardMove(dir);
+                this._game.damageEnemy();
+                this._moveTime = 0;
+            }
+        }
+
         if (dir !== -1) {
-            this._game.makeBoardMove(dir);
-            this._game.damageEnemy();
+            if (this._moveTime > this._moveThreshold) {
+                this._game.makeBoardMove(dir);
+                this._game.damageEnemy();
+                this._moveTime = 0;
+            }
+            else {
+                if (this._moveQueue.length < 2) {
+                    this._moveQueue.push(dir);
+                }
+            }
         }
 
         this._currentHitTime += deltaMS;

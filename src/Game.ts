@@ -147,6 +147,8 @@ export default class Game {
 
             { alias: 'circle', src: 'circle-16.png' },
 
+            { alias: 'SlackeyNumbers', src: 'Slackey-numbers.fnt' }
+
         ]).then(() => { this.onAssetsLoaded() });
     }
 
