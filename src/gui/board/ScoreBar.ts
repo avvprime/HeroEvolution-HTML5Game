@@ -43,7 +43,9 @@ export default class ScoreBar extends Container {
 
     private _value: number = 0;
 
-    constructor(parent: Board, parentWidth: number, parentHeight: number) {
+    private _adjustedScale: number = 1;
+
+    constructor(parent: Board, _parentWidth: number, _parentHeight: number) {
         super();
 
         this._parent = parent;
@@ -67,9 +69,6 @@ export default class ScoreBar extends Container {
 
         this._heightToWidthRatio = this._bg.height / this._bg.width;
 
-        this.adjustSize(parentWidth, parentHeight);
-        this.adjustPosition(parentWidth, parentHeight);
-
         this._activeRef = new ActiveRef(this.update.bind(this));
     }
 
@@ -80,7 +79,7 @@ export default class ScoreBar extends Container {
             return;
         }
         this._scoreChangeAnim.from = this._value;
-        this._scoreChangeAnim.to = score * 1000;
+        this._scoreChangeAnim.to = score;
         this._scoreChangeAnim.elapsedTime = 0;
         this._scoreChangeAnim.playing = true;
 
@@ -91,7 +90,7 @@ export default class ScoreBar extends Container {
             return;
         }
 
-        this._scoreScaleUpAnim.from = 1;
+        this._scoreScaleUpAnim.from = this._adjustedScale;
         this._scoreScaleUpAnim.elapsedTime = 0;
         this._scoreScaleUpAnim.playing = true;
 
@@ -153,6 +152,16 @@ export default class ScoreBar extends Container {
     private adjustSize(width: number, _height: number): void {
         this._bg.width = width * this._relWidth;
         this._bg.height = this._bg.width * this._heightToWidthRatio;
+        this._label.width = this._bg.width * 0.2;
+        this._label.height = this._bg.height * 0.5;
+
+        this._adjustedScale = Math.min(this._label.scale.x, this._label.scale.y);
+
+        this._scoreScaleUpAnim.from = this._adjustedScale;
+        this._scoreScaleUpAnim.to = this._adjustedScale * 1.3;
+
+        this._scoreScaleDownAnim.from = this._adjustedScale * 1.3;
+        this._scoreScaleDownAnim.to = this._adjustedScale;
     }
 
     private adjustPosition(width: number, height: number): void {
@@ -164,8 +173,10 @@ export default class ScoreBar extends Container {
             this.x = width / 2 - this._bg.width / 2;
             this.y = height * 0.05;
         }
-        this._label.x = this._bg.width / 2 + 16;
-        this._label.y = this._bg.height / 2 - 6;
+
+        this._label.x = this._bg.width / 2 + (30 * this._adjustedScale);
+        this._label.y = this._bg.height / 2 - (7 * this._adjustedScale);
+
     }
 
     private onAnimAdded(): void {
